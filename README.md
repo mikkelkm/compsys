@@ -1,2 +1,1 @@
-# compsys
-Compsys gruppe-arbejde
+# Github til compsys kode
