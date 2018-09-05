@@ -3,7 +3,7 @@
 #include <string.h> // strings
 
 int main(int argc, char* argv[]){
-	
+
 	// we only accept exactly one argument
 	if (argc!=2) {return EXIT_FAILURE;}
 
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
 	// create char array object for name of file type
 	char file_type[20] = ".ASCII";
 	// create char for chars in file
-	char c;
+	int c;
 
 	// open file with first argument from input
 	fp = fopen(argv[1], "r");
@@ -34,17 +34,17 @@ int main(int argc, char* argv[]){
 
 		// move pointer to end of file
 		fseek(fp, 0, SEEK_END);
-	
-    		int len_file = ftell(fp); 
+
+    		int len_file = ftell(fp);
 		if(len_file<1){
 			strcpy(file_type, "EMPTY file");
 		}
 
 		// move pointer to start of file
-		fseek(fp, 0, SEEK_SET);  		
+		fseek(fp, 0, SEEK_SET);
 
 		for(int i = 1;i<len_file;i++){
-			fscanf(fp, "%c", &c);
+			fscanf(fp, "%lc", &c);
 			//printf("%d\n", c);
 
 			if(c<1 || c>127){
@@ -55,8 +55,6 @@ int main(int argc, char* argv[]){
 		printf("PATH: %s\n", file_type);
 		// close file
    		fclose(fp);
-	}	
+	}
 return EXIT_SUCCESS;
 }
-
-
