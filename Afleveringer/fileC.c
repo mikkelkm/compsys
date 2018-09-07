@@ -1,6 +1,7 @@
 #include <stdio.h>  // fprintf, stdout
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS.
 #include <string.h> // strings
+#include <errno.h> // errors
 
 
 	// create enum class with file types and string output
@@ -33,11 +34,10 @@ int main(int argc, char* argv[]){
 
 	// open file with first argument from input
 	fp = fopen(argv[1], "r");
-
+	
 	// can we open file?
 	if (!fp) {
 		printf("Input read error!\n");
-		fclose(fp);
 		return EXIT_FAILURE;
 	} else {
 		// move pointer to end of file and get value
@@ -54,7 +54,14 @@ int main(int argc, char* argv[]){
 		
 		// for loop to check chars in file
 		for(int i = 1;i<len_file;i++){
-			fscanf(fp, "%lc", &c);
+
+		  // use fscanf(1) or fread(1)?
+		  //fscanf(fp, "%lc", &c);
+		  fread(&c,sizeof(char),1,fp);
+
+			// test print!
+			printf("%d = %c\n", c, c);
+			
 			// test if file data differs from ASCII
 			if(c<1 || c>127){
 			  tp = DATA;
