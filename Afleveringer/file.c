@@ -1,49 +1,81 @@
 #include <stdio.h>  // fprintf, stdout
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS.
 #include <string.h> // strings
- int main(int argc, char* argv[]){
+#include <errno.h> // errors
+
+
+	// create enum class with file types and string output
+	enum file_type {
+	  DATA,
+	  EMPTY,
+	  ASCII,
+	};
+
+int main(int argc, char* argv[]){
 
 	// we only accept exactly one argument
 	if (argc!=2) {return EXIT_FAILURE;}
- 	// create file object
+
+	const char * const FILE_TYPE_STRINGS[] = {
+	  "data",
+	  "empty",
+	  "ASCII text",
+	};
+
+	// set default file type
+	enum file_type tp;
+	tp = ASCII;
+
+	// create file object
 	FILE *fp;
- 	// create char array object for first line of file
-	//char line[100];
-	// create char array object for name of file type
-	char file_type[20] = ".ASCII";
+
 	// create char for chars in file
-	char c;
- 	// open file with first argument from input
-	fp = fopen(argv[1], "r");
- 	// can we open file?
+	int c = 0;
+
+	// open file with first argument from input
+	fp = fopen(argv[1], "rb");
+
+	// can we open file?
 	if (!fp) {
 		printf("Input read error!\n");
-		fclose(fp);
 		return EXIT_FAILURE;
 	} else {
- 		// get first line
-		//if(fgets (line, 60, fp)!=NULL ) {
-//			puts(line);
-  // 		}
- 		// move pointer to end of file
+		// move pointer to end of file and get value
 		fseek(fp, 0, SEEK_END);
-
     		int len_file = ftell(fp);
+
+		// EOF < 1 then the file is empty
 		if(len_file<1){
-			strcpy(file_type, "EMPTY file");
+		  tp = EMPTY;
 		}
- 		// move pointer to start of file
+
+		// move pointer to start of file
 		fseek(fp, 0, SEEK_SET);
- 		for(int i = 1;i<len_file;i++){
-			fscanf(fp, "%c", &c);
-			//printf("%d\n", c);
- 			if(c<1 || c>127){
-				strcpy(file_type, ".DATA");
+
+		// for loop to check chars in file
+		for(int i = 1;i<len_file;i++){
+
+		  // use fscanf(1) or fread(1)?
+		  //fscanf(fp, "%lc", &c);
+
+		  fread(&c, sizeof(char),1,fp);
+
+			// test print!
+      //printf("hej: %ld \n",ftell(fp));
+			//printf("%d = %c\n", c, c);
+      //printf(" %lc = %d = %c\n", c, c, c);
+
+			// test if file data differs from ASCII
+			if(c<1 || c>127){
+			  tp = DATA;
 			}
 		}
- 		printf("PATH: %s\n", file_type);
+		// print result of data file analysis
+		printf("%s: %s\n", argv[1],  FILE_TYPE_STRINGS[tp]);
+
 		// close file
    		fclose(fp);
 	}
 return EXIT_SUCCESS;
 }
+
