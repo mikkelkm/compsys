@@ -14,8 +14,11 @@
 int main(int argc, char* argv[]){
 
 	// we only accept exactly one argument
-	if (argc!=2) {return EXIT_FAILURE;}
-	
+	if (argc != 2){
+    fprintf(stderr, "Usage: file path\n");
+    return EXIT_FAILURE;
+  }
+
 	// string output to assist enum class
 	const char * const FILE_TYPE_STRINGS[] = {
 	  "data",
@@ -26,7 +29,7 @@ int main(int argc, char* argv[]){
 	// set default file type
 	enum file_type tp;
 	tp = ASCII;
-	
+
 	// create file object
 	FILE *fp;
 
@@ -36,7 +39,7 @@ int main(int argc, char* argv[]){
 
 	// open file with first argument from input
 	fp = fopen(argv[1], "rb");
-	
+
 	// can we open file?
 	if (!fp) {
 		printf("Input read error!\n");
@@ -53,7 +56,7 @@ int main(int argc, char* argv[]){
 
 		// move pointer to start of file
 		fseek(fp, 0, SEEK_SET);
-		
+
 		// for loop to check chars in file
 		for(int i = 1;i<len_file;i++){
 
@@ -63,7 +66,7 @@ int main(int argc, char* argv[]){
 
 		  // test print!
 		  // printf("%d = %c\n", c, c);
-			
+
 		  // test if file data differs from the ASCII characters mentioned in assignment description
 		  if(!( (c>=7 && c<=13) || (c==27) || (c>=32 && c<=126) )){
 		    tp = DATA;
@@ -72,7 +75,7 @@ int main(int argc, char* argv[]){
 		}
 		// print result of data file analysis
 		printf("%s: %s\n", argv[1],  FILE_TYPE_STRINGS[tp]);
-		
+
 		// close file
    		fclose(fp);
 	}
