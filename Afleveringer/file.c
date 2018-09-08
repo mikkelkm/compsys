@@ -11,6 +11,10 @@
 	  ASCII,
 	};
 
+int print_error(char *path, int errnum) {
+	return fprintf(stdout, "%s: cannot determine (%s)\n", path, strerror(errnum));
+}
+
 int main(int argc, char* argv[]){
 
 	// we only accept exactly one argument
@@ -42,8 +46,8 @@ int main(int argc, char* argv[]){
 
 	// can we open file?
 	if (!fp) {
-		printf("Input read error!\n");
-		return EXIT_FAILURE;
+		print_error(argv[1], errno);
+
 	} else {
 		// move pointer to end of file and get value
 		fseek(fp, 0, SEEK_END);
