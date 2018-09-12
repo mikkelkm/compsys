@@ -6,18 +6,22 @@
 
 	// create enum class with file types
 	enum file_type {
+	  NOFILE,
+	  NOACCESS,
 	  DATA,
 	  EMPTY,
 	  ASCII,
 	  UTF_8,
-	  Little_UTF_16,
-	  Big_UTF_16	  
+	  LITTLE_16,
+	  BIG_16,
 	};
 
 void detect_and_print_file_type(char *path){
 
 	// string output to assist enum class
 	const char * const FILE_TYPE_STRINGS[] = {
+	  "cannot determine (No such file or directory)",
+	  "cannot determine (Permission denied)",
 	  "data",
 	  "empty",
 	  "ASCII text",
@@ -38,7 +42,7 @@ void detect_and_print_file_type(char *path){
 	  
 	// can we open file?
 	if (!fp) {
-	  printf("Input read error!\n");
+	  tp = NOFILE;
 	} else {
 	  // get length of file
 	  fseek(fp, 0, SEEK_END);
