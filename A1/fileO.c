@@ -21,21 +21,34 @@ int main(int argc, char *argv[]){
     int dat = 0;
     int zeroFlag = 0;
     int size = 1;
+
     FILE *f1 = fopen(argv[i], "r");
+    
     if (f1 == NULL){
       fprintf(stderr, "%s%s cannot open %s (no such file or directory) \n", argv[i],":", argv[i]);
       exit(EXIT_FAILURE);
     }
     int c1 = fgetc(f1);
     int c2 = fgetc(f1);
+
+
+
+    // LOOOOOP
+    // look at chars in file
     while((c=fgetc(f1)) != EOF){
         int b1 = fgetc(f1);
         int b2 = fgetc(f1);
         int b3 = fgetc(f1);
         int b4 = fgetc(f1);
+	
+	
         if (ftell(f1) == 0){
-          size = 0;
+	  size = 0;
+	  //printf("%s%s this file is empty\n", argv[i],":");
         }
+	printf("%c \t %c \t %c \t %c \t %c \t %c \t %ld \n", c1, c2, b1, b2, b3, b4, ftell(f1));
+
+	
         if((c >= 128 && c <= 159) || (zeroFlag && c > 0 && c < 255)){
           iso = 0;
         }
@@ -68,9 +81,13 @@ int main(int argc, char *argv[]){
           dat = 1;
         }
     }
-    if(size == 0){
-      printf("%s%s this file is empty\n", argv[i],":");
-    }
+
+
+    //OK
+    
+    //if(size == 0){
+    //printf("%s%s this file is empty\n", argv[i],":");
+    // }
     if(asc == 1 && big == 0 && lit == 0){
       printf("%s%-8s ASCII text\n", argv[i],":");
     }
