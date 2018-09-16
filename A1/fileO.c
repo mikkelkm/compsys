@@ -20,19 +20,18 @@ int main(int argc, char *argv[]){
     int utf = 0;
     int dat = 0;
     int zeroFlag = 0;
-    int size = 1;
+    //int size = 1;
 
     FILE *f1 = fopen(argv[i], "r");
     
-    if (f1 == NULL){
+    if (f1 == NULL){	  
       fprintf(stderr, "%s%s cannot open %s (no such file or directory) \n", argv[i],":", argv[i]);
       exit(EXIT_FAILURE);
     }
+
     int c1 = fgetc(f1);
     int c2 = fgetc(f1);
-
-
-
+    
     // LOOOOOP
     // look at chars in file
     while((c=fgetc(f1)) != EOF){
@@ -41,15 +40,7 @@ int main(int argc, char *argv[]){
         int b3 = fgetc(f1);
         int b4 = fgetc(f1);
 	
-	
-        if (ftell(f1) == 0){
-	  size = 0;
-	  //printf("%s%s this file is empty\n", argv[i],":");
-        }
-	printf("%c \t %c \t %c \t %c \t %c \t %c \t %ld \n", c1, c2, b1, b2, b3, b4, ftell(f1));
-
-	
-        if((c >= 128 && c <= 159) || (zeroFlag && c > 0 && c < 255)){
+        if(((c >= 128) && (c <= 159)) || (zeroFlag && c > 0 && c < 255)){
           iso = 0;
         }
         if((zeroFlag && c > 0 && c < 127) || c > 127){
@@ -91,19 +82,19 @@ int main(int argc, char *argv[]){
     if(asc == 1 && big == 0 && lit == 0){
       printf("%s%-8s ASCII text\n", argv[i],":");
     }
-    if(iso == 1 && asc == 0 && utf == 0){
+    else if(iso == 1 && asc == 0 && utf == 0){
       printf("%s%-10s ISO-8859 text\n", argv[i],":");
     }
-    if(lit == 1){
+    else if(lit == 1){
       printf("%s%-1s Little-endian UTF-16 Unicode text\n", argv[i],":");
     }
-    if(big == 1){
+    else if(big == 1){
       printf("%s%-1s Big-endian UTF-16 Unicode text\n", argv[i],":");
     }
-    if(utf == 1 && asc == 0){
+    else if(utf == 1 && asc == 0){
       printf("%s%-3s UTF-8 Unicode text\n", argv[i],":");
     }
-    if(dat == 1){
+    else {
       printf("%s%-9s data\n", argv[i],":");
     }
   }
