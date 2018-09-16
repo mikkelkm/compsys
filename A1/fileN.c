@@ -51,7 +51,7 @@ void output_type(char *path, enum file_type tp){
 int detect_and_print_file_type(char *path){
 
   // create int to hold chars in file
-  int c = 0;
+  int c = 2;
 
   // set default file type
   enum file_type tp = ASCII;
