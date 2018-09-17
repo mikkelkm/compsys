@@ -27,7 +27,7 @@ void output_type(char *path, enum file_type tp){
     "empty",
     "ASCII text",
     "ISO-8859 text",
-    "UTF-8",
+    "UTF-8 Unicode text",
     "Little-endian UTF-16 Unicode text",
     "Big-endian UTF-16 Unicode text"
   };
@@ -38,7 +38,7 @@ int print_error(char *path, int errnum) {
   return fprintf(stdout, "%s: cannot open (%s)\n", path, strerror(errnum));
 }
 
-  
+
 int detect_and_print_file_type(char *path){
 
   // create int to hold chars in file
@@ -49,21 +49,21 @@ int detect_and_print_file_type(char *path){
 
   // create file objects
   FILE *fp;
-  fp = fopen(path, "rb");
-  
+  fp = fopen(path, "rb+");
+
   // File error
   if (!fp) {
     print_error(path, errno);
     return EXIT_SUCCESS;
-  } 
-  
+  }
+
   // get length of file
   fseek(fp, 0, SEEK_END);
   int len_file = ftell(fp);
 
   // EOF < 1 then the file is empty
   if(len_file==0){
-    output_type(path,EMPTY);       
+    output_type(path,EMPTY);
     // close file
     fclose(fp);
     return EXIT_SUCCESS;
@@ -78,19 +78,18 @@ int detect_and_print_file_type(char *path){
   int lit = 0;
   int big = 0;
   int utf = 0;
-  int dat = 0;
+  //int dat = 0;
   int zeroFlag = 0;
 
   int c1 = fgetc(fp);
   int c2 = fgetc(fp);
-  
-  while((c=fgetc(fp)) != EOF){
 
+
+  while((c=fgetc(fp)) != EOF){
     int b1 = fgetc(fp);
     int b2 = fgetc(fp);
     int b3 = fgetc(fp);
     int b4 = fgetc(fp);
-
 
     if(((c >= 128) && (c <= 159)) || (zeroFlag && c > 0 && c < 255)){
       iso = 0;
@@ -109,20 +108,20 @@ int detect_and_print_file_type(char *path){
     }
     if((b1 >> 5) == 0x6){
       if((b2 >> 6) == 0x2){
-	utf = 1;
+	       utf = 1;
       }
     }
     if((b1 >> 4) == 0xE){
       if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2))
-	utf = 1;
+	     utf = 1;
     }
     if((b1 >> 3) == 0x1E){
       if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2) && ((b4 >> 6) == 0x2))
-	utf = 1;
+	     utf = 1;
     }
-    if(asc == 0 && iso == 0 && lit == 0 && big == 0 && utf == 0){
-      dat = 1;
-    }
+    //if(asc == 0 && iso == 0 && lit == 0 && big == 0 && utf == 0){
+    //  dat = 1;
+    //}
   }
 
   if(asc == 1 && big == 0 && lit == 0){
@@ -135,7 +134,7 @@ int detect_and_print_file_type(char *path){
     tp = LITTLE_16;
   }
   else if(big == 1){
-    tp = BIG_16;    
+    tp = BIG_16;
   }
   else if(utf == 1 && asc == 0){
     tp = UTF_8;
@@ -143,9 +142,9 @@ int detect_and_print_file_type(char *path){
   else {
     tp = DATA;
   }
-  
+
   //output result of analysis
-  output_type(path,tp);    
+  output_type(path,tp);
   // close file
   fclose(fp);
   return EXIT_SUCCESS;
@@ -157,9 +156,9 @@ int main(int argc, char *argv[]){
   // set max length of input path
   max_length = 0;
   for(int i = 1;i < argc;i++){
-    max_length = ((int)strlen(argv[i]) > max_length) ? strlen(argv[i]): max_length;   
+    max_length = ((int)strlen(argv[i]) > max_length) ? (int)strlen(argv[i]) : max_length;
   }
-  
+
   // check each argument/path
   for(int i = 1;i < argc;i++){
     // detect file type of path i
