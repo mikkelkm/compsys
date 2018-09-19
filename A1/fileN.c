@@ -7,6 +7,22 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+
+
+
+
+
+#define UTF8_2B
+
+#define UTF8_3B
+
+#define UTF8_4B
+
+#define UTF8_CONT
+
+
+
+
 // create enum class with file types
 enum file_type {
   DATA,
@@ -83,7 +99,6 @@ int detect_and_print_file_type(char *path){
   int big = 0;
   int utf = 0;
   int dat = 0;
-  int zeroFlag = 0;
 
   int c1 = fgetc(fp);
   int c2 = fgetc(fp);
@@ -93,7 +108,7 @@ int detect_and_print_file_type(char *path){
 
 
   for(int i = 0;i<len_file;i++){
-    
+
     c = fgetc(fp);
     c_place = ftell(fp);
 
@@ -103,54 +118,55 @@ int detect_and_print_file_type(char *path){
       b3 = fgetc(fp);
       b4 = fgetc(fp);
     }
-    
+
     // move pointer back to c
     fseek(fp, c_place, SEEK_SET);
+    //printf("bla: %d\n", c);
+
+
 
     // sæt ISO flag ok
-    if(((c >= 128) && (c <= 159)) || (zeroFlag && (c > 0) && (c < 255))){
+    if((c < 32 && c > 13) || (c < 9 && c > 10)  || (c > 126 && c < 160) || c > 255){
       iso = 0;
     }
-    // sæt zeroflag
-    if(c == 0){
-      zeroFlag = 1;
-    }
-
     // sæt ASCII flag
-    if(((zeroFlag) && ((c>=7 && c<=13) || (c==27) || (c>=32 && c<=126)))
-       || (c > 127)){
+    if((c < 7 || (c > 13 && c < 27) || (c > 27 && c < 32) || c > 126)){
       asc = 0;
     }
 
-    if((c1 == 255) && (c2 == 254)){
+    if(c1 == 255 && c2 == 254){
       lit = 1;
+      iso = 0;
     }
-    
+
     if(c1 == 254 && c2 == 255){
       big = 1;
+      iso = 0;
     }
-    
+
     if((b1 >> 5) == 0x6){
       if((b2 >> 6) == 0x2){
-	utf = 1;
+	       utf = 1;
       }
     }
-    
+
     if((b1 >> 4) == 0xE){
-      if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2))
-	utf = 1;
+      if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2)){
+	     utf = 1;
+      }
     }
-    
+
     if((b1 >> 3) == 0x1E){
-      if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2) && ((b4 >> 6) == 0x2))
-	utf = 1;
+      if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2) && ((b4 >> 6) == 0x2)){
+	     utf = 1;
+      }
     }
-    if(asc == 0 && iso == 0 && lit == 0 && big == 0 && utf == 0){
-    dat = 1;
+    else{
+      dat = 1;
     }
   }
 
-  if(asc == 1 && big == 0 && lit == 0 && dat == 0){
+  if(asc == 1 && big == 0 && lit == 0){
     tp = ASCII;
   }
   else if(iso == 1 && asc == 0 && utf == 0){
@@ -162,12 +178,17 @@ int detect_and_print_file_type(char *path){
   else if(big == 1){
     tp = BIG_16;
   }
-  else if(utf == 1 && asc == 0){
+  else if(utf == 1){
     tp = UTF_8;
   }
-  else {
+  else if(dat == 1)
+  {
     tp = DATA;
   }
+
+printf("%d %d %d %d %d %d ", asc, iso, lit, big, utf, dat);
+
+
 
   //output result of analysis
   output_type(path,tp);
@@ -184,7 +205,7 @@ int main(int argc, char *argv[]){
     fprintf(stderr, "Usage: file path\n");
     return EXIT_FAILURE;
   }
-  
+
   // set max length of input path
   max_length = 0;
   for(int i = 1;i < argc;i++){
