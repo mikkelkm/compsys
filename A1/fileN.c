@@ -12,17 +12,6 @@
 
 
 
-#define UTF8_2B
-
-#define UTF8_3B
-
-#define UTF8_4B
-
-#define UTF8_CONT
-
-
-
-
 // create enum class with file types
 enum file_type {
   DATA,
