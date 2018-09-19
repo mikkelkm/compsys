@@ -12,13 +12,13 @@
 
 
 
-#define UTF8_2B
+#define UTF8_2B(c) (((c) >> 5) == 0x6)
 
-#define UTF8_3B
+#define UTF8_3B(c) (((c) >> 4) == 0xE)
 
-#define UTF8_4B
+#define UTF8_4B(c) (((c) >> 3) == 0x1E)
 
-#define UTF8_CONT
+#define UTF8_CONT(c) (((c) >> 6) == 0x2)
 
 
 
@@ -58,10 +58,6 @@ int detect_and_print_file_type(char *path){
 
   // create variables
   int c = '0';
-  char b1 = '1';
-  char b2 = '2';
-  char b3 = '3';
-  char b4 = '4';
   int c_place = 0;
 
   // set default file type
@@ -103,6 +99,7 @@ int detect_and_print_file_type(char *path){
   int c1 = fgetc(fp);
   int c2 = fgetc(fp);
 
+
   // move pointer to start of file (again)
   fseek(fp, 0, SEEK_SET);
 
@@ -112,12 +109,11 @@ int detect_and_print_file_type(char *path){
     c = fgetc(fp);
     c_place = ftell(fp);
 
-    b1 = c;
-    if(i<len_file-3){
-      b2 = fgetc(fp);
-      b3 = fgetc(fp);
-      b4 = fgetc(fp);
-    }
+    int b1 = fgetc(fp);
+    int b2 = fgetc(fp);
+    int b3 = fgetc(fp);
+    int b4 = fgetc(fp);
+
 
     // move pointer back to c
     fseek(fp, c_place, SEEK_SET);
@@ -203,7 +199,10 @@ int main(int argc, char *argv[]){
     fprintf(stderr, "Usage: file path\n");
     return EXIT_FAILURE;
   }
-
+  printf("%d\n", UTF8_CONT(128));
+  printf("%d\n", UTF8_2B(192));
+  printf("%d\n", UTF8_3B(224));
+  printf("%d\n", UTF8_4B(240));
   // set max length of input path
   max_length = 0;
   for(int i = 1;i < argc;i++){
