@@ -136,12 +136,10 @@ int detect_and_print_file_type(char *path){
 
     if(c1 == 255 && c2 == 254){
       lit = 1;
-      iso = 0;
     }
 
     if(c1 == 254 && c2 == 255){
       big = 1;
-      iso = 0;
     }
 
     if((b1 >> 5) == 0x6){
@@ -169,14 +167,14 @@ int detect_and_print_file_type(char *path){
   if(asc == 1 && big == 0 && lit == 0){
     tp = ASCII;
   }
-  else if(iso == 1 && asc == 0 && utf == 0){
-    tp = ISO;
-  }
   else if(lit == 1){
     tp = LITTLE_16;
   }
   else if(big == 1){
     tp = BIG_16;
+  }
+  else if(iso == 1 && asc == 0 && utf == 0){
+    tp = ISO;
   }
   else if(utf == 1){
     tp = UTF_8;
