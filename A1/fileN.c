@@ -8,9 +8,13 @@
 #include <sys/types.h>
 
 
+#define UTF8_2B(c) (((c) >> 5) == 0x6)
 
+#define UTF8_3B(c) (((c) >> 4) == 0xE)
 
+#define UTF8_4B(c) (((c) >> 3) == 0x1E)
 
+#define UTF8_CONT(c) (((c) >> 6) == 0x2)
 
 // create enum class with file types
 enum file_type {
@@ -47,10 +51,6 @@ int detect_and_print_file_type(char *path){
 
   // create variables
   int c = '0';
-  char b1 = '1';
-  char b2 = '2';
-  char b3 = '3';
-  char b4 = '4';
   int c_place = 0;
 
   // set default file type
@@ -92,6 +92,7 @@ int detect_and_print_file_type(char *path){
   int c1 = fgetc(fp);
   int c2 = fgetc(fp);
 
+
   // move pointer to start of file (again)
   fseek(fp, 0, SEEK_SET);
 
@@ -101,12 +102,11 @@ int detect_and_print_file_type(char *path){
     c = fgetc(fp);
     c_place = ftell(fp);
 
-    b1 = c;
-    if(i<len_file-3){
-      b2 = fgetc(fp);
-      b3 = fgetc(fp);
-      b4 = fgetc(fp);
-    }
+    int b1 = fgetc(fp);
+    int b2 = fgetc(fp);
+    int b3 = fgetc(fp);
+    int b4 = fgetc(fp);
+
 
     // move pointer back to c
     fseek(fp, c_place, SEEK_SET);
@@ -125,12 +125,10 @@ int detect_and_print_file_type(char *path){
 
     if(c1 == 255 && c2 == 254){
       lit = 1;
-      iso = 0;
     }
 
     if(c1 == 254 && c2 == 255){
       big = 1;
-      iso = 0;
     }
 
     if((b1 >> 5) == 0x6){
@@ -158,14 +156,14 @@ int detect_and_print_file_type(char *path){
   if(asc == 1 && big == 0 && lit == 0){
     tp = ASCII;
   }
-  else if(iso == 1 && asc == 0 && utf == 0){
-    tp = ISO;
-  }
   else if(lit == 1){
     tp = LITTLE_16;
   }
   else if(big == 1){
     tp = BIG_16;
+  }
+  else if(iso == 1 && asc == 0 && utf == 0){
+    tp = ISO;
   }
   else if(utf == 1){
     tp = UTF_8;
@@ -194,7 +192,10 @@ int main(int argc, char *argv[]){
     fprintf(stderr, "Usage: file path\n");
     return EXIT_FAILURE;
   }
-
+  printf("%d\n", UTF8_CONT(128));
+  printf("%d\n", UTF8_2B(192));
+  printf("%d\n", UTF8_3B(224));
+  printf("%d\n", UTF8_4B(240));
   // set max length of input path
   max_length = 0;
   for(int i = 1;i < argc;i++){
