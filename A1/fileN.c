@@ -38,11 +38,15 @@ int print_error(char *path, int errnum) {
   return fprintf(stdout, "%s: cannot open (%s)\n", path, strerror(errnum));
 }
 
-
 int detect_and_print_file_type(char *path){
 
-  // create int to hold chars in file
-  int c = -1;
+  // create variables
+  int c = '0';
+  char b1 = '1';
+  char b2 = '2';
+  char b3 = '3';
+  char b4 = '4';
+  int c_place = 0;
 
   // set default file type
   enum file_type tp = DATA;
@@ -78,53 +82,75 @@ int detect_and_print_file_type(char *path){
   int lit = 0;
   int big = 0;
   int utf = 0;
-  //int dat = 0;
+  int dat = 0;
   int zeroFlag = 0;
 
   int c1 = fgetc(fp);
   int c2 = fgetc(fp);
 
+  // move pointer to start of file (again)
+  fseek(fp, 0, SEEK_SET);
 
-  while((c=fgetc(fp)) != EOF){
-    int b1 = fgetc(fp);
-    int b2 = fgetc(fp);
-    int b3 = fgetc(fp);
-    int b4 = fgetc(fp);
 
-    if(((c >= 128) && (c <= 159)) || (zeroFlag && c > 0 && c < 255)){
+  for(int i = 0;i<len_file;i++){
+    
+    c = fgetc(fp);
+    c_place = ftell(fp);
+
+    b1 = c;
+    if(i<len_file-3){
+      b2 = fgetc(fp);
+      b3 = fgetc(fp);
+      b4 = fgetc(fp);
+    }
+    
+    // move pointer back to c
+    fseek(fp, c_place, SEEK_SET);
+
+    // sæt ISO flag ok
+    if(((c >= 128) && (c <= 159)) || (zeroFlag && (c > 0) && (c < 255))){
       iso = 0;
     }
-    if((zeroFlag && c > 0 && c < 127) || c > 127){
-      asc = 0;
-    }
+    // sæt zeroflag
     if(c == 0){
       zeroFlag = 1;
     }
-    if(c1 == 255 && c2 == 254){
+
+    // sæt ASCII flag
+    if(((zeroFlag) && ((c>=7 && c<=13) || (c==27) || (c>=32 && c<=126)))
+       || (c > 127)){
+      asc = 0;
+    }
+
+    if((c1 == 255) && (c2 == 254)){
       lit = 1;
     }
+    
     if(c1 == 254 && c2 == 255){
       big = 1;
     }
+    
     if((b1 >> 5) == 0x6){
       if((b2 >> 6) == 0x2){
-	       utf = 1;
+	utf = 1;
       }
     }
+    
     if((b1 >> 4) == 0xE){
       if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2))
-	     utf = 1;
+	utf = 1;
     }
+    
     if((b1 >> 3) == 0x1E){
       if(((b2 >> 6) == 0x2) && ((b3 >> 6) == 0x2) && ((b4 >> 6) == 0x2))
-	     utf = 1;
+	utf = 1;
     }
-    //if(asc == 0 && iso == 0 && lit == 0 && big == 0 && utf == 0){
-    //  dat = 1;
-    //}
+    if(asc == 0 && iso == 0 && lit == 0 && big == 0 && utf == 0){
+    dat = 1;
+    }
   }
 
-  if(asc == 1 && big == 0 && lit == 0){
+  if(asc == 1 && big == 0 && lit == 0 && dat == 0){
     tp = ASCII;
   }
   else if(iso == 1 && asc == 0 && utf == 0){
@@ -153,6 +179,12 @@ int detect_and_print_file_type(char *path){
 
 int main(int argc, char *argv[]){
 
+  // program only works with one or more arguments
+  if (argc < 2){
+    fprintf(stderr, "Usage: file path\n");
+    return EXIT_FAILURE;
+  }
+  
   // set max length of input path
   max_length = 0;
   for(int i = 1;i < argc;i++){
