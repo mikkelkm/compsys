@@ -118,6 +118,7 @@ int detect_and_print_file_type(char *path){
     if((c < 32 && c > 13) || (c < 9 && c > 10)  || (c > 126 && c < 160) || c > 255){
       iso = 0;
     }
+
     // sæt ASCII flag
     if((c < 7 || (c > 13 && c < 27) || (c > 27 && c < 32) || c > 126)){
       asc = 0;
