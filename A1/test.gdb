@@ -47,7 +47,13 @@ p UTF8_4B(128 | 64 | 32 | 16 | 7) > 0
 p UTF8_4B(128 + 64 + 32 + 16 + 8) == 0
 p UTF8_4B(128 | 64 | 32 | 16 | 8) == 0
 #
-
-
-
+p "More test.."
+p UTF8_2B(0) == 0
+p UTF8_3B(0) == 0
+p UTF8_4B(0) == 0
+p UTF8_CONT(0) == 0
+p UTF8_2B(8) != 1
+p UTF8_3B != 1
+p UTF8_4B != 1
+p UTF8_CONT !=1
 q
