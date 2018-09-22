@@ -1,13 +1,10 @@
 start
 p/x 192
 p/t 192
-
 p/t 0x80
 p/u 0x80
-
 p/x 0b110
 p/d 0b110
-
 #
 p "Some basic tests.."
 p UTF8_CONT(128) != 0
@@ -53,7 +50,8 @@ p UTF8_3B(0) == 0
 p UTF8_4B(0) == 0
 p UTF8_CONT(0) == 0
 p UTF8_2B(8) != 1
-p UTF8_3B != 1
-p UTF8_4B != 1
-p UTF8_CONT !=1
+p UTF8_3B(8) != 1
+p UTF8_4B(8) != 1
+p UTF8_CONT(8) !=1
 q
+
