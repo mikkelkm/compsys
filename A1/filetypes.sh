@@ -7,10 +7,10 @@ make file
 echo " "
 
 # test 1
-printf "hemmelighed" > hemmelig_fil
+printf "clandestine clandestine clandestine" > hemmelig_fil
 chmod -r hemmelig_fil
 
-echo "Hemmelig fil testes:"
+echo "Secret file, testing:"
 echo "file(1) VS our guess:"
 file hemmelig_fil
 ./file hemmelig_fil
@@ -20,7 +20,7 @@ rm hemmelig_fil
 
 # test 2
 
-echo "ikke-eksisterende fil testes:"
+echo "Non-existing file, testing:"
 echo "file(1) VS our guess:"
 file navn1
 ./file navn2
