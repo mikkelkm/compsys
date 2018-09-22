@@ -45,14 +45,14 @@ printf "@ABCDEFGHIJKLMNOPQRSTUVWXYZ" > test_files/ascii9.input
 printf "[\]^_\`" > test_files/ascii10.input
 printf "abcdefghijklmnopqrstuvwxyz" > test_files/ascii11.input
 
-# DATA test different chars between 127 and 255 
+# DATA test different chars between 127 and 255
 printf "TEST \x7F \n" > test_files/data7.input
 # The tests below output ISO-8859 text, thus fail when compared to "data"
-# printf "TEST \x99 \n" > test_files/data8.input
-# printf "TEST \xBB \n" > test_files/data9.input
-# printf "TEST \xCC \n" > test_files/data10.input
-# printf "TEST \xDD \n"> test_files/data11.input
-# printf "TEST \xFF" > test_files/data12.input
+printf "TEST \x99 \n" > test_files/data8.input
+printf "TEST \xBB \n" > test_files/data9.input
+printf "TEST \xCC \n" > test_files/data10.input
+printf "TEST \xDD \n"> test_files/data11.input
+printf "TEST \xFF" > test_files/data12.input
 
 # EMPTY test
 printf "" > test_files/empty.input
@@ -66,4 +66,3 @@ do
   ./file  "${f}" > "${f}.actual"
 done
 exit $exitcode
-

@@ -11,10 +11,17 @@
 	  ASCII,
 	};
 
+int print_error(char *path, int errnum) {
+	return fprintf(stdout, "%s: cannot determine (%s)\n", path, strerror(errnum));
+}
+
 int main(int argc, char* argv[]){
 
 	// we only accept exactly one argument
-	if (argc!=2) {return EXIT_FAILURE;}
+	if (argc != 2){
+    fprintf(stderr, "Usage: file path\n");
+    return EXIT_FAILURE;
+  }
 
 	// string output to assist enum class
 	const char * const FILE_TYPE_STRINGS[] = {
@@ -39,8 +46,8 @@ int main(int argc, char* argv[]){
 
 	// can we open file?
 	if (!fp) {
-		printf("Input read error!\n");
-		return EXIT_FAILURE;
+		print_error(argv[1], errno);
+
 	} else {
 		// move pointer to end of file and get value
 		fseek(fp, 0, SEEK_END);

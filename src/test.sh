@@ -45,7 +45,7 @@ printf "@ABCDEFGHIJKLMNOPQRSTUVWXYZ" > test_files/ascii9.input
 printf "[\]^_\`" > test_files/ascii10.input
 printf "abcdefghijklmnopqrstuvwxyz" > test_files/ascii11.input
 
-# DATA test different chars between 127 and 255 
+# DATA test different chars between 127 and 255
 printf "TEST \x7F \n" > test_files/data7.input
 # The tests below output ISO-8859 text, thus fail when compared to "data"
 # printf "TEST \x99 \n" > test_files/data8.input
@@ -56,6 +56,10 @@ printf "TEST \x7F \n" > test_files/data7.input
 
 # EMPTY test
 printf "" > test_files/empty.input
+
+# Hemmelig fil
+# printf "Hemmelig fil" > test_files/hemmelig.input
+# chmod -r test_files/hemmelig.input
 
 echo "Running the tests.."
 exitcode=0
@@ -74,4 +78,3 @@ do
   fi
 done
 exit $exitcode
-
