@@ -33,42 +33,42 @@ int max_length;
 
 // acii hjælpefunktion, ser om karakterer er inde for ascii-karaktersættet
 int is_ascii(int c){
-        if((c < 7 || (c > 13 && c < 27) || (c > 27 && c < 32) || c > 126)){
-		return 0;
-	}
-	else{
-		return 1;
-	}
+  if((c < 7 || (c > 13 && c < 27) || (c > 27 && c < 32) || c > 126)){
+    return 0;
+  }
+  else{
+    return 1;
+  }
 }
 
 // iso hjælpefunktion, ser om karakterer er inde for iso-8859-1-karaktersættet
 int is_iso(int c){
-	if((c < 32 && c > 13) || (c < 9 && c > 10)  || (c > 126 && c < 160) || c > 255){
-		return 0;
-	}
-	else{
-		return 1;
-	}
+  if((c < 32 && c > 13) || (c < 9 && c > 10)  || (c > 126 && c < 160) || c > 255){
+    return 0;
+  }
+  else{
+    return 1;
+  }
 }
 
 // little-endian hjælpefunktion, kigger efter "magic numbers"
 int is_lit(int c1, int c2){
-	if(c1 == 255 && c2 == 254){
-		return 1;
-	}
-	else{
-		return 0;
-	}
+  if(c1 == 255 && c2 == 254){
+    return 1;
+  }
+  else{
+    return 0;
+  }
 }
 
 // big-endian hjælpefunktion, kigger efter "magic numbers"
 int is_big(int c1, int c2){
-	if(c1 == 254 && c2 == 255){
-		return 1;
-	}
-	else{
-		return 0;
-	}
+  if(c1 == 254 && c2 == 255){
+    return 1;
+  }
+  else{
+    return 0;
+  }
 }
 
 
@@ -144,7 +144,7 @@ int detect_and_print_file_type(char *path){
 
     c = fgetc(fp);
     c_place = ftell(fp);
-		
+
     // saving first 4 bytes for utf8 check
     int b1 = fgetc(fp);
     int b2 = fgetc(fp);
@@ -156,33 +156,33 @@ int detect_and_print_file_type(char *path){
 
     // put ISO flag
     if (is_iso(c) != 1){
-		iso = 0;
+      iso = 0;
     }
 
     // put ASCII flag
     if (is_ascii(c) != 1){
-			asc = 0;
-		}
+      asc = 0;
+    }
 
-		// put little-endian flag
-		lit = is_lit(c1, c2);
+    // put little-endian flag
+    lit = is_lit(c1, c2);
 
-		// put big-endian flag
-		big = is_big(c1, c2);
+    // put big-endian flag
+    big = is_big(c1, c2);
 
-		// tjek for 2-byte utf8
+    // tjek for 2-byte utf8
     if(UTF8_2B(b1) && UTF8_CONT(b2)){
-	  	utf = 1;
+      utf = 1;
     }
 
-		// check for 3-byte utf8
-		if(UTF8_3B(b1) && UTF8_CONT(b2) && UTF8_CONT(b3)){
-	  	utf = 1;
+    // check for 3-byte utf8
+    if(UTF8_3B(b1) && UTF8_CONT(b2) && UTF8_CONT(b3)){
+      utf = 1;
     }
 
-		// check for 4-byte utf8
-		if(UTF8_4B(b1) && UTF8_CONT(b2) && UTF8_CONT(b3) && UTF8_CONT(b4)){
-	  	utf = 1;
+    // check for 4-byte utf8
+    if(UTF8_4B(b1) && UTF8_CONT(b2) && UTF8_CONT(b3) && UTF8_CONT(b4)){
+      utf = 1;
     }
 
     else{
