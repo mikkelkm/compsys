@@ -83,7 +83,7 @@ void output_type(char *path, enum file_type tp){
     "Little-endian UTF-16 Unicode text",
     "Big-endian UTF-16 Unicode text"
   };
-  fprintf(stdout, "%s:%*s\t%s\n", path, (int)(max_length-strlen(path)), " ", FILE_TYPE_STRINGS[tp]);
+  fprintf(stdout, "%s:%*s%s\n", path, (int)(max_length-strlen(path)), " ", FILE_TYPE_STRINGS[tp]);
 }
 
 int print_error(char *path, int errnum) {
