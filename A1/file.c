@@ -33,7 +33,7 @@ int max_length;
 
 // acii hjælpefunktion, ser om karakterer er inde for ascii-karaktersættet
 int is_ascii(int c){
-	if((c < 7 || (c > 13 && c < 27) || (c > 27 && c < 32) || c > 126)){
+        if((c < 7 || (c > 13 && c < 27) || (c > 27 && c < 32) || c > 126)){
 		return 0;
 	}
 	else{
@@ -133,7 +133,7 @@ int detect_and_print_file_type(char *path){
   int utf = 0;
   int dat = 0;
 
-	//saving first 2 bytes for little and big-endian check
+  //saving first 2 bytes for little and big-endian check
   int c1 = fgetc(fp);
   int c2 = fgetc(fp);
 
@@ -145,7 +145,7 @@ int detect_and_print_file_type(char *path){
     c = fgetc(fp);
     c_place = ftell(fp);
 		
-		// saving first 4 bytes for utf8 check
+    // saving first 4 bytes for utf8 check
     int b1 = fgetc(fp);
     int b2 = fgetc(fp);
     int b3 = fgetc(fp);
@@ -155,9 +155,9 @@ int detect_and_print_file_type(char *path){
     fseek(fp, c_place, SEEK_SET);
 
     // put ISO flag
-		if (is_iso(c) != 1){
-			iso = 0;
-		}
+    if (is_iso(c) != 1){
+		iso = 0;
+    }
 
     // put ASCII flag
     if (is_ascii(c) != 1){
