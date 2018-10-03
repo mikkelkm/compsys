@@ -13,12 +13,16 @@
 // major opcodes
 #define RETURN         0x0
 #define REG_ARITHMETIC 0x1
+
 #define REG_MOVQ       0x2
 #define REG_MOVQ_MEM   0x3
+
 #define CFLOW          0x4
 #define IMM_ARITHMETIC 0x5
+
 #define IMM_MOVQ       0x6
 #define IMM_MOVQ_MEM   0x7
+
 #define LEAQ2          0x8
 #define LEAQ3          0x9
 #define LEAQ6          0xA
@@ -112,8 +116,9 @@ int main(int argc, char* argv[]) {
         // read major operation code
         bool is_return = is(RETURN, major_op);
 
-        bool is_movq_reg = is(REG_MOVQ, major_op);
-        bool is_movq_mem = is(REG_MOVQ_MEM, major_op);
+        // TO USE FOR WHAT?
+        bool is_movq_from_reg = is(REG_MOVQ, major_op);
+        bool is_movq_from_mem = is(REG_MOVQ_MEM, major_op);
 
         // Minor encoding "flags"
         bool is_movq_reg_to_reg = is(MIN_REG_REG, minor_op);
@@ -170,18 +175,13 @@ int main(int argc, char* argv[]) {
         // choose result to write back to register
         //val datapath_result = from_int(0); // no result for return - you will want to change this
         val datapath_result = or(
-                                or(
-                                  use_if(is_movq_mem_to_reg, reg_out_b),
-                                  use_if(is_movq_reg_to_reg, reg_out_b)),
-                                or(
-                                  use_if(is_movq_imm_to_reg, reg_out_b),
-                                  use_if(/* else case */)))
+                                 or(use_if(is_movq_reg_to_reg, reg_out_b),
+                                    use_if(is_movq_mem_to_reg, mem_out)),
+                                 use_if(is_movq_imm_to_reg, reg_out_b));
+
+
 
         reg_wr_enable = WRITE_TO_REG;
-
-
-
-
 
 
 
