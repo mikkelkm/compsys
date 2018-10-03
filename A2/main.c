@@ -27,14 +27,17 @@
 
 // minor opcodes
 #define MIN_REG_REG    0x1
-#define MIN_REG_MEM    0x2
-#define MIN_MEM_REG    0x3
-#define MIN_IMM_REG    0x4
-#define MIM_IMM_MEM    0x5
+#define MIN_REG_IMM    0x2
+#define MIN_REG_MEM    0x3
+
+#define MIN_MEM_REG    0x4
+#define MIN_MEM_IMM    0x5
+
+#define MIN_IMM_REG    0x6
+#define MIN_IMM_IMM    0x7
+#define MIM_IMM_MEM    0x8
+
 /*
-#define IMM_MOVQ       0x6
-#define IMM_MOVQ_MEM   0x7
-#define LEAQ2          0x8
 #define LEAQ3          0x9
 #define LEAQ6          0xA
 #define LEAQ7          0xB
@@ -42,6 +45,10 @@
 */
 #define JMP 0xF
 #define CALL 0xE
+
+// write to reg or to mem
+#define WRITE_TO_REG   (is_movq_reg_to_reg || is_movq_mem_to_reg || is_movq_imm_to_reg)
+#define STORE_IN_MEM   (is_movq_reg_to_mem || is_movq_imm_to_mem)
 
 int main(int argc, char* argv[]) {
     // Check command line parameters.
@@ -86,7 +93,7 @@ int main(int argc, char* argv[]) {
 
         // NO CHANGES BEFORE THIS LINE
 
-        printf("%lx\n", pc.val);  // <---- You may want to silence this
+        //printf("%lx\n", pc.val);  // <---- You may want to silence this
         /*** FETCH ***/
 
         // We're fetching 10 bytes in the form of 10 vals with one byte each
@@ -104,27 +111,26 @@ int main(int argc, char* argv[]) {
         // decode instruction type
         // read major operation code
         bool is_return = is(RETURN, major_op);
-        // Add further decoding from here
+
         bool is_movq_reg = is(REG_MOVQ, major_op);
         bool is_movq_mem = is(REG_MOVQ_MEM, major_op);
 
         // Minor encoding "flags"
-        // Gør 0x1 til "opcodes"
         bool is_movq_reg_to_reg = is(MIN_REG_REG, minor_op);
         bool is_movq_reg_to_mem = is(MIN_REG_MEM, minor_op);
         bool is_movq_mem_to_reg = is(MIN_MEM_REG, minor_op);
+        bool is_movq_imm_to_reg = is(MIN_IMM_REG, minor_op);
+        bool is_movq_imm_to_mem = is(MIN_REG_MEM, minor_op);
 
         // determine instruction size - we only understand return, so fix it at 2
         val ins_size = from_int(2);
 
         // control signals for memory access - you will want to change these
-        bool is_load = false;
-        bool is_store= false;
+        bool is_load = is_movq_mem_to_reg;
+        bool is_store= STORE_IN_MEM;
 
         // setting up register read and write - you will want to change these
         val reg_read_dz = reg_d; // for return we just need reg_d
-
-
 
         // - other read port is always reg_s
         // - write is always to reg_d
@@ -163,9 +169,9 @@ int main(int argc, char* argv[]) {
         /*** WRITE ***/
         // choose result to write back to register
         //val datapath_result = from_int(0); // no result for return - you will want to change this
-        val datapath_result =  reg_out_b; // no result for return - you will want to change this
-        reg_wr_enable = is_movq_reg;
+        val datapath_result =  reg_out_b;
 
+        reg_wr_enable = WRITE_TO_REG;
 
 
 
