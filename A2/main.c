@@ -169,7 +169,13 @@ int main(int argc, char* argv[]) {
         /*** WRITE ***/
         // choose result to write back to register
         //val datapath_result = from_int(0); // no result for return - you will want to change this
-        val datapath_result =  reg_out_b;
+        val datapath_result = or(
+                                or(
+                                  use_if(is_movq_mem_to_reg, reg_out_b),
+                                  use_if(is_movq_reg_to_reg, reg_out_b)),
+                                or(
+                                  use_if(is_movq_imm_to_reg, reg_out_b),
+                                  use_if(/* else case */)))
 
         reg_wr_enable = WRITE_TO_REG;
 
