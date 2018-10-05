@@ -41,6 +41,10 @@
 #define MIN_IMM_REG    0x6
 #define MIN_IMM_IMM    0x7
 #define MIM_IMM_MEM    0x8
+#define MIN_IMM_MEM_REG 0x5
+#define MIN_REG_IMM_MEM 0xD
+
+
 
 /*
 #define LEAQ3          0x9
@@ -143,9 +147,15 @@ int main(int argc, char* argv[]) {
         bool is_movq_mem_to_reg = is(MIN_MEM_REG, minor_op);
         bool is_movq_imm_to_reg = is(MIN_IMM_REG, minor_op);
         bool is_movq_imm_to_mem = is(MIN_REG_MEM, minor_op);
+        bool is_movq_reg_to_imm_mem = is(MIN_REG_IMM_MEM, minor_op);
+        bool is_movq_imm_mem_to_reg = is(MIN_IMM_MEM_REG, minor_op);
 
         // determine instruction size - we only understand return, so fix it at 2
-        val ins_size = from_int(2);
+        val ins_size = or(use_if(( is_return || is_arithmetic || is_movq_mem_to_reg || is_movq_reg_to_reg || is_movq_reg_to_mem), from_int(2)),
+                         or(use_if(( is_cflow || is_call || is_movq_imm_to_reg || is_movq_reg_to_imm_mem || is_movq_imm_mem_to_reg),  from_int(6)),
+                          or(use_if(( ), from_int(3)), // LEAQ3
+                           or(use_if(( ), from_int(7)),  //LEAQ7
+                            or(use_if((), from_int(10)) )))));
 
         // control signals for memory access - you will want to change these
         bool is_load = is_movq_mem_to_reg;
