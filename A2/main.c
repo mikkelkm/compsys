@@ -189,12 +189,16 @@ int main(int argc, char* argv[]) {
                                                val alu_op, val condition)
         */
 
-        val compute_result = compute_execute(reg_read_dz, reg_s, imm, reg_read_dz, !IMMEDIATE_USE,
-                                           imm, shift_amount, bool use_agen, val alu_op, val condition);
-
-
-
-
+        val compute_result = compute_execute(reg_out_a,      // val op_z_or_d
+                                             reg_out_b,      // val op_s
+                                             imm,            // val imm
+                                             reg_read_dz,    // bool sel_z_or_d
+                                             !IMMEDIATE_USE, // bool sel_s
+                                             imm,            // bool sel_imm
+                                             shift_amount,   // val shift_amount
+                                             bool use_agen,  // bool use_agen     leaq eller ej
+                                             val alu_op,     // val alu_op
+                                             val condition); // val condition)
 
         // succeeding instruction in memory
         val pc_inc  = add(pc, ins_size);
