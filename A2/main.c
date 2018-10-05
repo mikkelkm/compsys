@@ -11,6 +11,7 @@
 #include "compute.h"
 
 // major opcodes
+// der indgår et register og memeory
 #define RETURN         0x0
 #define REG_ARITHMETIC 0x1
 
@@ -32,9 +33,9 @@
 // minor opcodes
 #define MIN_REG_REG    0x1
 #define MIN_REG_IMM    0x2
-#define MIN_REG_MEM    0x3
+#define MIN_REG_MEM    0x9
 
-#define MIN_MEM_REG    0x4
+#define MIN_MEM_REG    0x1
 #define MIN_MEM_IMM    0x5
 
 #define MIN_IMM_REG    0x6
