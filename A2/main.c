@@ -54,6 +54,9 @@
 #define WRITE_TO_REG   (is_movq_reg_to_reg || is_movq_mem_to_reg || is_movq_imm_to_reg)
 #define STORE_IN_MEM   (is_movq_reg_to_mem || is_movq_imm_to_mem)
 
+// use immediate
+#define IMMEDIATE_USE  (is_movq_imm_to_reg || is_movq_imm_to_mem)
+
 int main(int argc, char* argv[]) {
     // Check command line parameters.
     if (argc < 2)
@@ -98,11 +101,23 @@ int main(int argc, char* argv[]) {
         // NO CHANGES BEFORE THIS LINE
 
         //printf("%lx\n", pc.val);  // <---- You may want to silence this
+
+
+
+
+
+
+
+
+
+
         /*** FETCH ***/
 
         // We're fetching 10 bytes in the form of 10 vals with one byte each
         val inst_bytes[10];
         memory_read_unaligned(mem, pc, inst_bytes, true);
+
+
 
         /*** DECODE ***/
         // read 4 bit values
@@ -115,6 +130,7 @@ int main(int argc, char* argv[]) {
         // decode instruction type
         // read major operation code
         bool is_return = is(RETURN, major_op);
+        bool is_arithmetic = is(IMM_ARITHMETIC, major_op) || is(REG_ARITHMETIC, major_op);
 
         // TO USE FOR WHAT?
         bool is_movq_from_reg = is(REG_MOVQ, major_op);
@@ -135,11 +151,14 @@ int main(int argc, char* argv[]) {
         bool is_store= STORE_IN_MEM;
 
         // setting up register read and write - you will want to change these
-        val reg_read_dz = reg_d; // for return we just need reg_d
+        val reg_read_dz = reg_d;
+        reg_read_dz = use_if(is_movq_reg_to_reg ,reg_d); // for return we just need reg_d
 
         // - other read port is always reg_s
         // - write is always to reg_d
         bool reg_wr_enable = false;
+
+
 
         /*** EXECUTE ***/
         // read registers
@@ -148,8 +167,23 @@ int main(int argc, char* argv[]) {
 
         // perform calculations - Return needs no calculation. you will want to change this.
         // Here you should hook up a call to compute_execute with all the proper
-        // arguments in place
-        val compute_result = from_int(0); // you will want to change this.
+        val imm = use_if(IMMEDIATE_USE, reg_s);
+
+        int shift_amount = 0; // HOW TO GET SHIFT AMOUNT?
+
+        /*
+        compute_execute_result compute_execute(val op_z_or_d, val op_s, val imm,
+                                               bool sel_z_or_d, bool sel_s, bool sel_imm,
+                                               val shift_amount, bool use_agen,
+                                               val alu_op, val condition)
+        */
+
+        val compute_result = compute_execute(reg_read_dz, reg_s, imm, reg_read_dz, !IMMEDIATE_USE,
+                                           imm, shift_amount, bool use_agen, val alu_op, val condition);
+
+
+
+
 
         // succeeding instruction in memory
         val pc_inc  = add(pc, ins_size);
@@ -177,11 +211,17 @@ int main(int argc, char* argv[]) {
         val datapath_result = or(
                                  or(use_if(is_movq_reg_to_reg, reg_out_b),
                                     use_if(is_movq_mem_to_reg, mem_out)),
-                                 use_if(is_movq_imm_to_reg, reg_out_b));
+                                 use_if(is_movq_imm_to_reg, reg_out_b)); // skal være call
 
 
 
         reg_wr_enable = WRITE_TO_REG;
+
+
+
+
+
+
 
 
 
