@@ -32,6 +32,7 @@
 
 // minor opcodes
 #define MIN_REG_REG    0x1
+
 #define MIN_REG_IMM    0x2
 #define MIN_REG_MEM    0x9
 
@@ -40,11 +41,12 @@
 
 #define MIN_IMM_REG    0x6
 #define MIN_IMM_IMM    0x7
-#define MIM_IMM_MEM    0x8
-#define MIN_IMM_MEM_REG 0x5
-#define MIN_REG_IMM_MEM 0xD
+#define MIN_IMM_MEM    0x8
 
-
+#define MIN_MOVQ_REG_MEM    0x9
+#define MIN_LEAQ       0xB
+#define MIN_CALL       0xE
+#define MIN_JMP        0xF
 
 /*
 #define LEAQ3          0x9
@@ -52,15 +54,14 @@
 #define LEAQ7          0xB
 #define IMM_CBRANCH    0xF
 */
-#define JMP 0xF
-#define CALL 0xE
 
 // write to reg or to mem
 #define WRITE_TO_REG   (is_movq_reg_to_reg || is_movq_mem_to_reg || is_movq_imm_to_reg)
-#define STORE_IN_MEM   (is_movq_reg_to_mem || is_movq_imm_to_mem)
+#define STORE_IN_MEM   (is(0x9, minor_op) || is(0xD, minor_op))
 
-// use immediate
-#define IMMEDIATE_USE  (is_movq_imm_to_reg || is_movq_imm_to_mem)
+#define IMM_IN_2_5     (is(0x5, major_op) || is(0x6, major_op) || is(0x7, major_op) || is(0xA, major_op) || is(0xF, major_op))
+#define IMM_IN_3_6     is(0xB, major_op)
+
 
 int main(int argc, char* argv[]) {
     // Check command line parameters.
@@ -113,9 +114,6 @@ int main(int argc, char* argv[]) {
 
 
 
-
-
-
         /*** FETCH ***/
 
         // We're fetching 10 bytes in the form of 10 vals with one byte each
@@ -131,44 +129,98 @@ int main(int argc, char* argv[]) {
 
         val reg_d = pick_bits(4, 4, inst_bytes[1]);
         val reg_s = pick_bits(0, 4, inst_bytes[1]);
+        //val reg_z = pick_bits(4, 4, inst_bytes[2]);
+        val shift_amount = pick_bits(0, 4, inst_bytes[2]);
+
+        //val x = inst_bytes[1];
+
+        val immByte2 = pick_bits(0, 8, inst_bytes[2]);
+        val immByte3 = pick_bits(0, 8, inst_bytes[3]);
+        val immByte4 = pick_bits(0, 8, inst_bytes[4]);
+        val immByte5 = pick_bits(0, 8, inst_bytes[5]);
+        val immByte6 = pick_bits(0, 8, inst_bytes[6]);
+
+        val imm2_5 = or(
+                        or(put_bits(24, 8, immByte5),
+                           put_bits(16, 8, immByte4)),
+                        or(put_bits(8, 8, immByte3),
+                           put_bits(0, 8, immByte2)));
+
+        val imm3_6 = or(
+                        or(put_bits(24, 8, immByte6),
+                           put_bits(16, 8, immByte5)),
+                        or(put_bits(8, 8, immByte4),
+                           put_bits(0, 8, immByte3)));
 
         // decode instruction type
+
         // read major operation code
         bool is_return = is(RETURN, major_op);
         bool is_arithmetic = is(IMM_ARITHMETIC, major_op) || is(REG_ARITHMETIC, major_op);
 
-        // TO USE FOR WHAT?
-        bool is_movq_from_reg = is(REG_MOVQ, major_op);
-        bool is_movq_from_mem = is(REG_MOVQ_MEM, major_op);
-
         // Minor encoding "flags"
         bool is_movq_reg_to_reg = is(MIN_REG_REG, minor_op);
-        bool is_movq_reg_to_mem = is(MIN_REG_MEM, minor_op);
+        //bool is_movq_reg_to_mem = is(MIN_REG_MEM, minor_op);
         bool is_movq_mem_to_reg = is(MIN_MEM_REG, minor_op);
         bool is_movq_imm_to_reg = is(MIN_IMM_REG, minor_op);
-        bool is_movq_imm_to_mem = is(MIN_REG_MEM, minor_op);
-        bool is_movq_reg_to_imm_mem = is(MIN_REG_IMM_MEM, minor_op);
-        bool is_movq_imm_mem_to_reg = is(MIN_IMM_MEM_REG, minor_op);
+        //bool is_movq_imm_to_mem = is(MIN_REG_MEM, minor_op);
 
-        // determine instruction size - we only understand return, so fix it at 2
+        // definite codes for arithmetic
+        bool is_add = (is_arithmetic && is(0x0, minor_op));
+        bool is_sub = (is_arithmetic && is(0x1, minor_op));
+        bool is_and = (is_arithmetic && is(0x2, minor_op));
+        bool is_or  = (is_arithmetic && is(0x3, minor_op));
+        bool is_xor = (is_arithmetic && is(0x4, minor_op));
+        bool is_mul = (is_arithmetic && is(0x5, minor_op));
+
+        val alu_op = or(
+                        or(
+                           or(
+                               use_if(is_add, from_int(0x0)),
+                               use_if(is_sub, from_int(0x1))),
+                            or(
+                               use_if(is_and, from_int(0x2)),
+                               use_if(is_or, from_int(0x3)))),
+                        or(
+                           use_if(is_xor, from_int(0x4)),
+                           use_if(is_mul, from_int(0x5))));
+
+
+        // determine instruction size
+        /*
         val ins_size = or(use_if(( is_return || is_arithmetic || is_movq_mem_to_reg || is_movq_reg_to_reg || is_movq_reg_to_mem), from_int(2)),
-                         or(use_if(( is_cflow || is_call || is_movq_imm_to_reg || is_movq_reg_to_imm_mem || is_movq_imm_mem_to_reg),  from_int(6)),
-                          or(use_if(( ), from_int(3)), // LEAQ3
-                           or(use_if(( ), from_int(7)),  //LEAQ7
-                            or(use_if((), from_int(10)) )))));
+                          or(use_if(( is_cflow || is_call || is_movq_imm_to_reg || is_movq_reg_to_imm_mem || is_movq_imm_mem_to_reg),  from_int(6)),
+                             or(use_if(( ), from_int(3)), // LEAQ3
+                                or(use_if(( ), from_int(7)),  //LEAQ7
+                                   or(use_if((), from_int(10)) )))));
+        */
+
+        // ligegyldig test value
+        val ins_size = from_int(4);
+
+        // immediate without sign extension
+        val imm = or(
+                       use_if(IMM_IN_2_5,
+                              imm2_5),
+                       use_if(IMM_IN_3_6,
+                              imm3_6));
+
+        // extend sign bit in immediate      #USIKKERT OM VI SKAL DETTE!? se https://absalon.instructure.com/courses/28624/discussion_topics/145619
+        // val imm = sign_extend(31, immUS);
 
         // control signals for memory access - you will want to change these
-        bool is_load = is_movq_mem_to_reg;
-        bool is_store= STORE_IN_MEM;
+        bool is_load  = true;   // 8 forskellige load cases
+        bool is_store = STORE_IN_MEM; // dobbeltkonfekt, behold kun 1 bool
 
         // setting up register read and write - you will want to change these
         val reg_read_dz = reg_d;
         reg_read_dz = use_if(is_movq_reg_to_reg ,reg_d); // for return we just need reg_d
 
+        //val op_z_or_d =  (reg_read_dz, reg_d);
+
         // - other read port is always reg_s
         // - write is always to reg_d
         bool reg_wr_enable = false;
-
 
 
         /*** EXECUTE ***/
@@ -179,7 +231,19 @@ int main(int argc, char* argv[]) {
         // perform calculations - Return needs no calculation. you will want to change this.
         // Here you should hook up a call to compute_execute with all the proper
 
-       
+        val compute_result = compute_execute(reg_out_a,      // val op_z_or_d
+                                             reg_out_b,      // val op_s
+                                             imm,            // val imm
+                                             false,          // bool sel_z_or_d
+                                             false,          // bool sel_s
+                                             (IMM_IN_2_5 || IMM_IN_3_6),            // bool sel_imm
+                                             shift_amount,   // val shift_amount
+                                             false,          // bool use_agen,  // bool use_agen     leaq eller ej
+                                             alu_op,         // val alu_op
+                                             from_int(9999)).result; // val condition); // val condition)
+
+        // succeeding instruction in memory
+        val pc_inc  = add(pc, ins_size);
 
         // determine the next position of the program counter - you'll want to change this
         // to handle more instructions. Here we only distinguish between return and all other insns
@@ -200,12 +264,10 @@ int main(int argc, char* argv[]) {
 
         /*** WRITE ***/
         // choose result to write back to register
-        //val datapath_result = from_int(0); // no result for return - you will want to change this
         val datapath_result = or(
                                  or(use_if(is_movq_reg_to_reg, reg_out_b),
                                     use_if(is_movq_mem_to_reg, mem_out)),
-                                 use_if(is_movq_imm_to_reg, reg_out_b)); // skal være call
-
+                                 use_if(is(MIN_CALL, minor_op), reg_out_b)); // skal være call !?
 
 
         reg_wr_enable = WRITE_TO_REG;
