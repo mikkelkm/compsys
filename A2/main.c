@@ -181,20 +181,6 @@ int main(int argc, char* argv[]) {
 
        
 
-        val compute_result = compute_execute(reg_out_a,      // val op_z_or_d
-                                             reg_out_b,      // val op_s
-                                             imm,            // val imm
-                                             reg_read_dz,    // bool sel_z_or_d
-                                             !IMMEDIATE_USE, // bool sel_s
-                                             imm,            // bool sel_imm
-                                             shift_amount,   // val shift_amount
-                                             bool use_agen,  // bool use_agen     leaq eller ej
-                                             val alu_op,     // val alu_op
-                                             val condition); // val condition)
-
-        // succeeding instruction in memory
-        val pc_inc  = add(pc, ins_size);
-
         // determine the next position of the program counter - you'll want to change this
         // to handle more instructions. Here we only distinguish between return and all other insns
         val pc_next = or(use_if(is_return, reg_out_b),
