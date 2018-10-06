@@ -11,7 +11,7 @@
 #include "compute.h"
 
 // major opcodes
-// der indgår et register og memeory
+// der indgår et register og memory
 #define RETURN         0x0
 #define REG_ARITHMETIC 0x1
 
@@ -31,6 +31,7 @@
 #define IMM_CBRANCH    0xF
 
 // minor opcodes
+// TODO
 #define MIN_REG_REG    0x1
 
 #define MIN_REG_IMM    0x2
@@ -107,12 +108,6 @@ int main(int argc, char* argv[]) {
 
         // NO CHANGES BEFORE THIS LINE
 
-        //printf("%lx\n", pc.val);  // <---- You may want to silence this
-
-
-
-
-
 
 
         /*** FETCH ***/
@@ -125,7 +120,7 @@ int main(int argc, char* argv[]) {
         /*** DECODE ***/
         // read 4 bit values
         val major_op = pick_bits(4,  4, inst_bytes[0]);
-        val minor_op = pick_bits(0,  4, inst_bytes[0]); // not actually used yet
+        val minor_op = pick_bits(0,  4, inst_bytes[0]);
 
         val reg_d = pick_bits(4, 4, inst_bytes[1]);
         val reg_s = pick_bits(0, 4, inst_bytes[1]);
@@ -160,12 +155,12 @@ int main(int argc, char* argv[]) {
         bool is_return = is(RETURN, major_op);
         bool is_arithmetic = is(IMM_ARITHMETIC, major_op) || is(REG_ARITHMETIC, major_op);
 
-        // Minor encoding "flags"
+        // minor encoding "flags"
         bool is_movq_reg_to_reg = is(MIN_REG_REG, minor_op);
-        //bool is_movq_reg_to_mem = is(MIN_REG_MEM, minor_op);
+        // bool is_movq_reg_to_mem = is(MIN_REG_MEM, minor_op);
         bool is_movq_mem_to_reg = is(MIN_MEM_REG, minor_op);
         bool is_movq_imm_to_reg = is(MIN_IMM_REG, minor_op);
-        //bool is_movq_imm_to_mem = is(MIN_REG_MEM, minor_op);
+        // bool is_movq_imm_to_mem = is(MIN_REG_MEM, minor_op);
 
         // definite codes for arithmetic
         bool is_add = (is_arithmetic && is(0x0, minor_op));
@@ -189,6 +184,7 @@ int main(int argc, char* argv[]) {
 
 
         // determine instruction size
+        // TODO
         /*
         val ins_size = or(use_if(( is_return || is_arithmetic || is_movq_mem_to_reg || is_movq_reg_to_reg || is_movq_reg_to_mem), from_int(2)),
                           or(use_if(( is_cflow || is_call || is_movq_imm_to_reg || is_movq_reg_to_imm_mem || is_movq_imm_mem_to_reg),  from_int(6)),
@@ -196,8 +192,7 @@ int main(int argc, char* argv[]) {
                                 or(use_if(( ), from_int(7)),  //LEAQ7
                                    or(use_if((), from_int(10)) )))));
         */
-
-        // ligegyldig test value
+        // ligegyldig inst test value
         val ins_size = from_int(4);
 
         // immediate without sign extension
@@ -211,6 +206,7 @@ int main(int argc, char* argv[]) {
         // val imm = sign_extend(31, immUS);
 
         // control signals for memory access - you will want to change these
+        // TODO
         bool is_load  = true;   // 8 forskellige load cases
         bool is_store = STORE_IN_MEM; // dobbeltkonfekt, behold kun 1 bool
 
@@ -219,11 +215,10 @@ int main(int argc, char* argv[]) {
                              use_if(Z_VAL, reg_z),
                              use_if(!Z_VAL, reg_d));
 
-        //val op_z_or_d =  (reg_read_dz, reg_d);
-
         // - other read port is always reg_s
         // - write is always to reg_d
-        bool reg_wr_enable = false;
+        // TODO ?
+        bool reg_wr_enable = WRITE_TO_REG;
 
 
         /*** EXECUTE ***/
@@ -232,7 +227,7 @@ int main(int argc, char* argv[]) {
         val reg_out_b = reg_read(regs, reg_s);
 
         // perform calculations - Return needs no calculation. you will want to change this.
-        // Here you should hook up a call to compute_execute with all the proper
+        // Here you should hook up a call to compute_execute with all the proper parameters
 
         val compute_result = compute_execute(reg_out_a,      // val op_z_or_d
                                              reg_out_b,      // val op_s
@@ -250,6 +245,7 @@ int main(int argc, char* argv[]) {
 
         // determine the next position of the program counter - you'll want to change this
         // to handle more instructions. Here we only distinguish between return and all other insns
+        // TODO
         val pc_next = or(use_if(is_return, reg_out_b),
                          use_if(!is_return, pc_inc));
 
@@ -259,6 +255,7 @@ int main(int argc, char* argv[]) {
         /*** MEMORY ***/
         // read from memory if needed
         // (Not used for simulating return, so "mem_out" will be unused initially)
+        // TODO
         val mem_out = memory_read(mem, compute_result, is_load);
 
 
@@ -266,17 +263,12 @@ int main(int argc, char* argv[]) {
 
 
         /*** WRITE ***/
+        // TODO
         // choose result to write back to register
         val datapath_result = or(
                                  or(use_if(is_movq_reg_to_reg, reg_out_b),
                                     use_if(is_movq_mem_to_reg, mem_out)),
                                  use_if(is(MIN_CALL, minor_op), reg_out_b)); // skal være call !?
-
-
-        reg_wr_enable = WRITE_TO_REG;
-
-
-
 
 
 
