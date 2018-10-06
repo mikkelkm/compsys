@@ -48,19 +48,20 @@
 #define MIN_CALL       0xE
 #define MIN_JMP        0xF
 
-/*
-#define LEAQ3          0x9
-#define LEAQ6          0xA
-#define LEAQ7          0xB
-#define IMM_CBRANCH    0xF
-*/
-
 // write to reg or to mem
 #define WRITE_TO_REG   (is_movq_reg_to_reg || is_movq_mem_to_reg || is_movq_imm_to_reg)
 #define STORE_IN_MEM   (is(0x9, minor_op) || is(0xD, minor_op))
 
 #define IMM_IN_2_5     (is(0x5, major_op) || is(0x6, major_op) || is(0x7, major_op) || is(0xA, major_op) || is(0xF, major_op))
 #define IMM_IN_3_6     is(0xB, major_op)
+
+#define Z_VAL          (is(0x9, major_op) || is(0xB, major_op))
+#define LEAQ_DZ        (Z_VAL || is(0x8, major_op) || is(0xA, major_op))
+#define LEAQ           (is(0x8, major_op) || is(0x9, major_op) || is(0xA, major_op) || is(0xB, major_op))
+#define LEAQ_S         (LEAQ && (is(0x1, minor_op) || is(0x3, minor_op) || is(0x5, minor_op) || is(0x7, minor_op)))
+
+#define LEGAL_SHIFT    (is(0x0, shift_amount1) || is(0x1, shift_amount1) || is(0x2, shift_amount1) || is(0x3, shift_amount1))
+#define COND           (is(0xF, major_op) || (is(0x4, major_op) && !MIN_JMP && !MIN_CALL))
 
 
 int main(int argc, char* argv[]) {
@@ -121,7 +122,6 @@ int main(int argc, char* argv[]) {
         memory_read_unaligned(mem, pc, inst_bytes, true);
 
 
-
         /*** DECODE ***/
         // read 4 bit values
         val major_op = pick_bits(4,  4, inst_bytes[0]);
@@ -129,10 +129,12 @@ int main(int argc, char* argv[]) {
 
         val reg_d = pick_bits(4, 4, inst_bytes[1]);
         val reg_s = pick_bits(0, 4, inst_bytes[1]);
-        //val reg_z = pick_bits(4, 4, inst_bytes[2]);
-        val shift_amount = pick_bits(0, 4, inst_bytes[2]);
+        val reg_z = pick_bits(4, 4, inst_bytes[2]);
+        val shift_amount1 = pick_bits(0, 4, inst_bytes[2]);
+        val condition = use_if(COND, minor_op);
 
-        //val x = inst_bytes[1];
+        // test if shift amount is legal (1-4)
+        val shift_amount = use_if(LEGAL_SHIFT, shift_amount1);
 
         val immByte2 = pick_bits(0, 8, inst_bytes[2]);
         val immByte3 = pick_bits(0, 8, inst_bytes[3]);
@@ -213,8 +215,9 @@ int main(int argc, char* argv[]) {
         bool is_store = STORE_IN_MEM; // dobbeltkonfekt, behold kun 1 bool
 
         // setting up register read and write - you will want to change these
-        val reg_read_dz = reg_d;
-        reg_read_dz = use_if(is_movq_reg_to_reg ,reg_d); // for return we just need reg_d
+        val reg_read_dz = or(
+                             use_if(Z_VAL, reg_z),
+                             use_if(!Z_VAL, reg_d));
 
         //val op_z_or_d =  (reg_read_dz, reg_d);
 
@@ -234,13 +237,13 @@ int main(int argc, char* argv[]) {
         val compute_result = compute_execute(reg_out_a,      // val op_z_or_d
                                              reg_out_b,      // val op_s
                                              imm,            // val imm
-                                             false,          // bool sel_z_or_d
-                                             false,          // bool sel_s
-                                             (IMM_IN_2_5 || IMM_IN_3_6),            // bool sel_imm
+                                             LEAQ_DZ,        // bool sel_z_or_d
+                                             LEAQ_S,         // bool sel_s
+                                             (IMM_IN_2_5 || IMM_IN_3_6), // bool sel_imm
                                              shift_amount,   // val shift_amount
-                                             false,          // bool use_agen,  // bool use_agen     leaq eller ej
+                                             LEAQ,           // bool use_agen,  // bool use_agen     leaq eller ej
                                              alu_op,         // val alu_op
-                                             from_int(9999)).result; // val condition); // val condition)
+                                             condition).result; // val condition); // val condition)
 
         // succeeding instruction in memory
         val pc_inc  = add(pc, ins_size);
