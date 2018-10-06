@@ -178,16 +178,8 @@ int main(int argc, char* argv[]) {
 
         // perform calculations - Return needs no calculation. you will want to change this.
         // Here you should hook up a call to compute_execute with all the proper
-        val imm = use_if(IMMEDIATE_USE, reg_s);
 
-        int shift_amount = 0; // HOW TO GET SHIFT AMOUNT?
-
-        /*
-        compute_execute_result compute_execute(val op_z_or_d, val op_s, val imm,
-                                               bool sel_z_or_d, bool sel_s, bool sel_imm,
-                                               val shift_amount, bool use_agen,
-                                               val alu_op, val condition)
-        */
+       
 
         val compute_result = compute_execute(reg_out_a,      // val op_z_or_d
                                              reg_out_b,      // val op_s
