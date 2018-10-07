@@ -18,7 +18,7 @@
 #define REG_MOVQ       0x2
 #define REG_MOVQ_MEM   0x3
 
-#define CFLOW          0x4
+#define CFLOW_CALL_JMP 0x4
 #define IMM_ARITHMETIC 0x5
 
 #define IMM_MOVQ       0x6
@@ -50,7 +50,6 @@
 #define MIN_LEAQ_5     0x5
 #define MIN_LEAQ_6     0x6
 #define MIN_LEAQ_7     0x7
-#define MIN_LEAQ_D     0xD
 
 // EXTRA MACROES
 // load write store operations
@@ -62,13 +61,17 @@
 #define IMM_IN_2_5     (is(0x5, major_op) || is(0x6, major_op) || is(0x7, major_op) || is(0xA, major_op) || is(0xF, major_op))
 #define IMM_IN_3_6     is(LEAQ7, major_op)
 
+// target address range
+#define TARGET_IN_2_5  is(CFLOW_CALL_JMP, major_op)
+#define TARGET_IN_3_6  is(COND, major_op)
+
 #define Z_VAL          (is(0x9, major_op) || is(0xB, major_op))
 #define LEAQ_DZ        (Z_VAL || is(0x8, major_op) || is(0xA, major_op))
 #define LEAQ           (is(0x8, major_op) || is(0x9, major_op) || is(0xA, major_op) || is(0xB, major_op))
 #define LEAQ_S         (LEAQ && (is(MIN_LEAQ_1, minor_op) || is( MIN_LEAQ_3, minor_op) || is( MIN_LEAQ_5, minor_op) || is( MIN_LEAQ_7, minor_op)))
 
 #define LEGAL_SHIFT    (is(0x0, shift_amount1) || is(0x1, shift_amount1) || is(0x2, shift_amount1) || is(0x3, shift_amount1))
-#define COND           (is(0xF, major_op) || (is(0x4, major_op) && !MIN_JMP && !MIN_CALL))
+#define COND           (is(0xF, major_op) || (is(CFLOW_CALL_JMP, major_op) && !(is(MIN_JMP,minor_op) || is(MIN_CALL, minor_op))))
 
 
 
@@ -159,13 +162,31 @@ int main(int argc, char* argv[]) {
                         or(put_bits(8, 8, immByte4),
                            put_bits(0, 8, immByte3)));
 
+
+
+        // bit target adress (PP..32..PP in encoding.txt)
+        val target2_5 = or(
+                        or(put_bits(24, 8, immByte5),
+                           put_bits(16, 8, immByte4)),
+                        or(put_bits(8, 8, immByte3),
+                           put_bits(0, 8, immByte2)));
+
+        val target3_6 = or(
+                        or(put_bits(24, 8, immByte6),
+                           put_bits(16, 8, immByte5)),
+                        or(put_bits(8, 8, immByte4),
+                           put_bits(0, 8, immByte3)));
+
+        val target_adress = or(use_if(TARGET_IN_2_5, target2_5),
+                               (use_if(TARGET_IN_3_6, target3_6)));
+
         // decode instruction type
 
         // read major operation code
         bool is_return = is(RETURN, major_op);
         bool is_arithmetic = is(IMM_ARITHMETIC, major_op) || is(REG_ARITHMETIC, major_op);
 
-        bool is_cflow = is(CFLOW, major_op);
+        bool is_cflow_call_jump = is(CFLOW_CALL_JMP, major_op);
         bool is_imm_cbranch = is(IMM_CBRANCH, major_op);
 
         bool is_movq = is(REG_MOVQ, major_op);
@@ -174,42 +195,30 @@ int main(int argc, char* argv[]) {
 
         bool is_movq_reg_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op) && is_movq_mem;
         bool is_movq_mem_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op) && is_movq_mem;
-        bool is_movq_reg_to_mem = is(MIN_MOVQ_REG_MEM, minor_op) && is_movq_mem;
-
-
+        //bool is_movq_reg_to_mem = is(MIN_MOVQ_REG_MEM, minor_op) && is_movq_mem;
 
         bool is_imm_movq = is(IMM_MOVQ, major_op);
         bool is_movq_imm_to_reg = is(MIN_MOVQ_IMM_REG, minor_op) && is_imm_movq;
         bool is_imm_movq_mem = is(IMM_MOVQ_MEM, major_op);
-        bool is_imm_movq_mem_reg = is(MIN_MOVQ_IMM_MEM_REG, minor_op) &&  is_imm_movq_mem;
-        bool is_imm_reg_imm_mem = is(MIN_MOVQ_REG_IMM_MEM, minor_op) && is_imm_movq_mem;
-
-
-
-
+        //bool is_imm_movq_mem_reg = is(MIN_MOVQ_IMM_MEM_REG, minor_op) &&  is_imm_movq_mem;
+        //bool is_imm_reg_imm_mem = is(MIN_MOVQ_REG_IMM_MEM, minor_op) && is_imm_movq_mem;
 
         bool is_leaq2 = is(LEAQ2, major_op);
         bool is_leaq3 = is(LEAQ3, major_op);
-        bool is_leaq3_2 = is(MIN_LEAQ_2, minor_op) && is_leaq3;
-        bool is_leaq3_3 = is(MIN_LEAQ_3, minor_op) && is_leaq3;
+        //bool is_leaq3_2 = is(MIN_LEAQ_2, minor_op) && is_leaq3;
+        //bool is_leaq3_3 = is(MIN_LEAQ_3, minor_op) && is_leaq3;
 
         bool is_leaq6 = is(LEAQ6, major_op);
-        bool is_leaq6_4 = is(MIN_LEAQ_4, minor_op) && is_leaq6;
-        bool is_leaq6_5 = is(MIN_LEAQ_5, minor_op) && is_leaq6;
-        bool is_leaq6_D = is(MIN_LEAQ_D, minor_op) && is_leaq6;
+        //bool is_leaq6_4 = is(MIN_LEAQ_4, minor_op) && is_leaq6;
+        //bool is_leaq6_5 = is(MIN_LEAQ_5, minor_op) && is_leaq6;
 
         bool is_leaq7 = is(LEAQ7, major_op);
-        bool is_leaq7_6 = is(MIN_LEAQ_6, minor_op) && is_leaq7;
-        bool is_leaq7_7 = is(MIN_LEAQ_7, minor_op) && is_leaq7;
+        //bool is_leaq7_6 = is(MIN_LEAQ_6, minor_op) && is_leaq7;
+        //bool is_leaq7_7 = is(MIN_LEAQ_7, minor_op) && is_leaq7;
+
         // minor encoding "flags"
-
-
-
-
-
-        bool is_jmp = is(MIN_JMP, minor_op);
-        bool is_call = is(MIN_CALL, minor_op);
-
+        //bool is_jmp = is(MIN_JMP, minor_op);
+        //bool is_call = is(MIN_CALL, minor_op);
 
         // definite codes for arithmetic
         bool is_imm_arimetic= is(IMM_ARITHMETIC, major_op);
@@ -236,11 +245,10 @@ int main(int argc, char* argv[]) {
         // determine instruction size
         // TODO
         val ins_size = or(use_if(( is_return || is_arithmetic || is_leaq2 || is_movq || is_movq_mem), from_int(2)),
-                          or(use_if(( is_cflow || is_call  || is_imm_arimetic|| is_imm_movq|| is_imm_movq_mem|| is_leaq6 || is_jmp),  from_int(6)),
+                          or(use_if(( is_cflow_call_jump || is_imm_arimetic|| is_imm_movq|| is_imm_movq_mem|| is_leaq6),  from_int(6)),
                              or(use_if(( is_leaq3), from_int(3)), // LEAQ3
                                 or(use_if(( is_leaq7), from_int(7)),  //LEAQ7
                                    (use_if(( is_imm_cbranch), from_int(10)) )))));
-
 
         // immediate without sign extension
         val imm = or(
