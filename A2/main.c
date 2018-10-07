@@ -50,7 +50,7 @@
 #define MIN_LEAQ_5     0x5
 #define MIN_LEAQ_6     0x6
 #define MIN_LEAQ_7     0x7
-
+#define MIN_LEAQ_7     0xD
 
 // EXTRA MACROES
 // load write store operations
@@ -170,9 +170,17 @@ int main(int argc, char* argv[]) {
 
         bool is_leaq2 = is(LEAQ2, major_op);
         bool is_leaq3 = is(LEAQ3, major_op);
-        bool is_leaq6 = is(LEAQ6, major_op);
-        bool is_leaq7 = is(LEAQ7, major_op);
+        bool is_leaq3_2 = is(MIN_LEAQ_2, minor_op) && is_leaq3;
+        bool is_leaq3_3 = is(MIN_LEAQ_3, minor_op) && is_leaq3;
 
+        bool is_leaq6 = is(LEAQ6, major_op);
+        bool is_leaq6_4 = is(MIN_LEAQ_4, minor_op) && is_leaq6;
+        bool is_leaq6_5 = is(MIN_LEAQ_5, minor_op) && is_leaq6;
+        bool is_leaq6_D = is(MIN_LEAQ_D, minor_op) && is_leaq6;
+
+        bool is_leaq7 = is(LEAQ7, major_op);
+        bool is_leaq7_6 = is(MIN_LEAQ_6, minor_op) && is_leaq7
+        bool is_leaq7_7 = is(MIN_LEAQ_7, minor_op) && is_leaq7
         // minor encoding "flags"
         // TODO, virker mærkeligt, med to ens bool
         bool is_movq_reg_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op);
@@ -180,8 +188,8 @@ int main(int argc, char* argv[]) {
         bool is_movq_imm_to_reg = is(MIN_MOVQ_IMM_REG, minor_op);
 
 
-        bool is_jmp = is(JMP, major_op);
-        bool is_call = is(CALL, major_op);
+        bool is_jmp = is(JMP, minor_op);
+        bool is_call = is(CALL, minor_op);
 
 
         // definite codes for arithmetic
