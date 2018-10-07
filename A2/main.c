@@ -52,21 +52,20 @@
 #define MIN_LEAQ_7     0x7
 
 
-
-
-
 // EXTRA MACROES
-// write to reg or to mem
+// load write store operations
 #define WRITE_TO_REG   (is_movq_reg_to_reg || is_movq_mem_to_reg || is_movq_imm_to_reg)
-#define STORE_IN_MEM   (is(0x9, minor_op) || is(0xD, minor_op))
+#define STORE_IN_MEM   (is(MIN_MOVQ_REG_MEM , minor_op) || is(MIN_MOVQ_REG_IMM_MEM, minor_op))
+#define LOAD_FROM_MEM  ((LEAQ && !(is(MIN_LEAQ_4, minor_op))) || (is(IMM_MOVQ_MEM, major_op) && is(MIN_MOVQ_IMM_MEM_REG, minor_op)) || (is(IMM_MOVQ_MEM, major_op) && is(MIN_MOVQ_IMM_MEM_REG, minor_op)))
 
+// immediate range
 #define IMM_IN_2_5     (is(0x5, major_op) || is(0x6, major_op) || is(0x7, major_op) || is(0xA, major_op) || is(0xF, major_op))
-#define IMM_IN_3_6     is(0xB, major_op)
+#define IMM_IN_3_6     is(LEAQ7, major_op)
 
 #define Z_VAL          (is(0x9, major_op) || is(0xB, major_op))
 #define LEAQ_DZ        (Z_VAL || is(0x8, major_op) || is(0xA, major_op))
 #define LEAQ           (is(0x8, major_op) || is(0x9, major_op) || is(0xA, major_op) || is(0xB, major_op))
-#define LEAQ_S         (LEAQ && (is(0x1, minor_op) || is(0x3, minor_op) || is(0x5, minor_op) || is(0x7, minor_op)))
+#define LEAQ_S         (LEAQ && (is(MIN_LEAQ_1, minor_op) || is( MIN_LEAQ_3, minor_op) || is( MIN_LEAQ_5, minor_op) || is( MIN_LEAQ_7, minor_op)))
 
 #define LEGAL_SHIFT    (is(0x0, shift_amount1) || is(0x1, shift_amount1) || is(0x2, shift_amount1) || is(0x3, shift_amount1))
 #define COND           (is(0xF, major_op) || (is(0x4, major_op) && !MIN_JMP && !MIN_CALL))
@@ -216,9 +215,8 @@ int main(int argc, char* argv[]) {
         // val imm = sign_extend(31, immUS);
 
         // control signals for memory access - you will want to change these
-        // TODO
-        bool is_load  = true;   // 8 forskellige load cases
-        bool is_store = STORE_IN_MEM; // dobbeltkonfekt, behold kun 1 bool
+        bool is_load  = LOAD_FROM_MEM;   // 8 forskellige load cases
+        bool is_store = STORE_IN_MEM;    // 2 forskellige store cases
 
         // setting up register read and write - you will want to change these
         val reg_read_dz = or(
@@ -227,7 +225,6 @@ int main(int argc, char* argv[]) {
 
         // - other read port is always reg_s
         // - write is always to reg_d
-        // TODO ?
         bool reg_wr_enable = WRITE_TO_REG;
 
 
