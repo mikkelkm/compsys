@@ -50,7 +50,7 @@
 #define MIN_LEAQ_5     0x5
 #define MIN_LEAQ_6     0x6
 #define MIN_LEAQ_7     0x7
-#define MIN_LEAQ_7     0xD
+#define MIN_LEAQ_D     0xD
 
 // EXTRA MACROES
 // load write store operations
@@ -168,6 +168,26 @@ int main(int argc, char* argv[]) {
         bool is_cflow = is(CFLOW, major_op);
         bool is_imm_cbranch = is(IMM_CBRANCH, major_op);
 
+        bool is_movq = is(REG_MOVQ, major_op);
+        bool is_movq_mem = is(REG_MOVQ_MEM, major_op);
+
+
+        bool is_movq_reg_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op) && is_movq_mem;
+        bool is_movq_mem_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op) && is_movq_mem;
+        bool is_movq_reg_to_mem = is(MIN_MOVQ_REG_MEM, minor_op) && is_movq_mem;
+
+
+
+        bool is_imm_movq = is(IMM_MOVQ, major_op);
+        bool is_movq_imm_to_reg = is(MIN_MOVQ_IMM_REG, minor_op) && is_imm_movq;
+        bool is_imm_movq_mem = is(IMM_MOVQ_MEM, major_op);
+        bool is_imm_movq_mem_reg = is(MIN_MOVQ_IMM_MEM_REG, minor_op) &&  is_imm_movq_mem;
+        bool is_imm_reg_imm_mem = is(MIN_MOVQ_REG_IMM_MEM, minor_op) && is_imm_movq_mem;
+
+
+
+
+
         bool is_leaq2 = is(LEAQ2, major_op);
         bool is_leaq3 = is(LEAQ3, major_op);
         bool is_leaq3_2 = is(MIN_LEAQ_2, minor_op) && is_leaq3;
@@ -179,20 +199,20 @@ int main(int argc, char* argv[]) {
         bool is_leaq6_D = is(MIN_LEAQ_D, minor_op) && is_leaq6;
 
         bool is_leaq7 = is(LEAQ7, major_op);
-        bool is_leaq7_6 = is(MIN_LEAQ_6, minor_op) && is_leaq7
-        bool is_leaq7_7 = is(MIN_LEAQ_7, minor_op) && is_leaq7
+        bool is_leaq7_6 = is(MIN_LEAQ_6, minor_op) && is_leaq7;
+        bool is_leaq7_7 = is(MIN_LEAQ_7, minor_op) && is_leaq7;
         // minor encoding "flags"
-        // TODO, virker mærkeligt, med to ens bool
-        bool is_movq_reg_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op);
-        bool is_movq_mem_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op);
-        bool is_movq_imm_to_reg = is(MIN_MOVQ_IMM_REG, minor_op);
 
 
-        bool is_jmp = is(JMP, minor_op);
-        bool is_call = is(CALL, minor_op);
+
+
+
+        bool is_jmp = is(MIN_JMP, minor_op);
+        bool is_call = is(MIN_CALL, minor_op);
 
 
         // definite codes for arithmetic
+        bool is_imm_arimetic= is(IMM_ARITHMETIC, major_op);
         bool is_add = (is_arithmetic && is(0x0, minor_op));
         bool is_sub = (is_arithmetic && is(0x1, minor_op));
         bool is_and = (is_arithmetic && is(0x2, minor_op));
@@ -215,14 +235,12 @@ int main(int argc, char* argv[]) {
 
         // determine instruction size
         // TODO
-        val ins_size = or(use_if(( is_return || is_arithmetic || is_movq_mem_to_reg || is_movq_reg_to_reg || is_movq_reg_to_mem || is_leaq2), from_int(2)),
-                          or(use_if(( is_cflow || is_call || is_movq_imm_to_reg || is_movq_reg_to_imm_mem || is_movq_imm_mem_to_reg || is_leaq7 || is_jmp),  from_int(6)),
+        val ins_size = or(use_if(( is_return || is_arithmetic || is_leaq2 || is_movq || is_movq_mem), from_int(2)),
+                          or(use_if(( is_cflow || is_call  || is_imm_arimetic|| is_imm_movq|| is_imm_movq_mem|| is_leaq6 || is_jmp),  from_int(6)),
                              or(use_if(( is_leaq3), from_int(3)), // LEAQ3
                                 or(use_if(( is_leaq7), from_int(7)),  //LEAQ7
-                                   or(use_if(( is_imm_cbranch), from_int(10)) )))));
+                                   (use_if(( is_imm_cbranch), from_int(10)) )))));
 
-        // ligegyldig inst test value
-        val ins_size = from_int(4);
 
         // immediate without sign extension
         val imm = or(
