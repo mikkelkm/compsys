@@ -11,7 +11,6 @@
 #include "compute.h"
 
 // major opcodes
-// der indgår et register og memory
 #define RETURN         0x0
 #define REG_ARITHMETIC 0x1
 
@@ -51,7 +50,8 @@
 #define MIN_LEAQ_6     0x6
 #define MIN_LEAQ_7     0x7
 
-// EXTRA MACROES
+// EXTRA MACROS
+
 // load write store operations
 #define WRITE_TO_REG   (is_movq_reg_to_reg || is_movq_mem_to_reg || is_movq_imm_to_reg)
 #define STORE_IN_MEM   (is(MIN_MOVQ_REG_MEM , minor_op) || is(MIN_MOVQ_REG_IMM_MEM, minor_op))
@@ -116,8 +116,6 @@ int main(int argc, char* argv[]) {
 
         // NO CHANGES BEFORE THIS LINE
 
-
-
         /*** FETCH ***/
 
         // We're fetching 10 bytes in the form of 10 vals with one byte each
@@ -133,12 +131,12 @@ int main(int argc, char* argv[]) {
         val reg_d = pick_bits(4, 4, inst_bytes[1]);
         val reg_s = pick_bits(0, 4, inst_bytes[1]);
         val reg_z = pick_bits(4, 4, inst_bytes[2]);
-        val shift_amount1 = pick_bits(0, 4, inst_bytes[2]);
         val condition = use_if(COND, minor_op);
-
+        val shift_amount1 = pick_bits(0, 4, inst_bytes[2]);
         // test if shift amount is legal (1-4)
         val shift_amount = use_if(LEGAL_SHIFT, shift_amount1);
 
+        // read immediate bits
         val immByte2 = pick_bits(0, 8, inst_bytes[2]);
         val immByte3 = pick_bits(0, 8, inst_bytes[3]);
         val immByte4 = pick_bits(0, 8, inst_bytes[4]);
@@ -157,7 +155,7 @@ int main(int argc, char* argv[]) {
                         or(put_bits(8, 8, immByte4),
                            put_bits(0, 8, immByte3)));
 
-        // bit target adress (PP..32..PP in encoding.txt)
+        // read bit target adress (PP..32..PP in encoding.txt)
         val target2_5 = or(
                         or(put_bits(24, 8, immByte5),
                            put_bits(16, 8, immByte4)),
@@ -171,9 +169,12 @@ int main(int argc, char* argv[]) {
                            put_bits(0, 8, immByte3)));
 
         // TODO
-        // hvor skal target address bruges?
+        // #hvor skal target address bruges?
+        /*
+
         val target_adress = or(use_if(TARGET_IN_2_5, target2_5),
                                (use_if(TARGET_IN_3_6, target3_6)));
+        */
 
         // decode instruction type
 
@@ -237,10 +238,9 @@ int main(int argc, char* argv[]) {
                            use_if(is_xor, from_int(0x4)),
                            use_if(is_mul, from_int(0x5))));
 
-
         // determine instruction size
         val ins_size = or(use_if(( is_return || is_arithmetic || is_leaq2 || is_movq || is_movq_mem), from_int(2)),
-                          or(use_if(( is_cflow_call_jump || is_imm_arimetic|| is_imm_movq|| is_imm_movq_mem|| is_leaq6),  from_int(6)),
+                          or(use_if(( is_cflow_call_jump || is_imm_arimetic || is_imm_movq || is_imm_movq_mem || is_leaq6),  from_int(6)),
                              or(use_if(( is_leaq3), from_int(3)), // LEAQ3
                                 or(use_if(( is_leaq7), from_int(7)),  //LEAQ7
                                    (use_if(( is_imm_cbranch), from_int(10)) )))));
@@ -269,7 +269,6 @@ int main(int argc, char* argv[]) {
         // - write is always to reg_d
         bool reg_wr_enable = WRITE_TO_REG;
 
-
         /*** EXECUTE ***/
         // read registers
         val reg_out_a = reg_read(regs, reg_read_dz);
@@ -278,37 +277,33 @@ int main(int argc, char* argv[]) {
         // perform calculations - Return needs no calculation. you will want to change this.
         // Here you should hook up a call to compute_execute with all the proper parameters
 
-        val compute_result = compute_execute(reg_out_a,      // val op_z_or_d
-                                             reg_out_b,      // val op_s
-                                             imm,            // val imm
-                                             LEAQ_DZ,        // bool sel_z_or_d
-                                             LEAQ_S,         // bool sel_s
+        val compute_result = compute_execute(reg_out_a,         // val op_z_or_d
+                                             reg_out_b,         // val op_s
+                                             imm,               // val imm
+                                             LEAQ_DZ,           // bool sel_z_or_d
+                                             LEAQ_S,            // bool sel_s
                                              (IMM_IN_2_5 || IMM_IN_3_6), // bool sel_imm
-                                             shift_amount,   // val shift_amount
-                                             LEAQ,           // bool use_agen,  // bool use_agen     leaq eller ej
-                                             alu_op,         // val alu_op
-                                             condition).result; // val condition); // val condition)
+                                             shift_amount,      // val shift_amount
+                                             LEAQ,              // bool use_agen, dvs. leaq eller ej
+                                             alu_op,            // val alu_op
+                                             condition).result; // val condition)
 
         // succeeding instruction in memory
         val pc_inc  = add(pc, ins_size);
 
         // determine the next position of the program counter - you'll want to change this
-        // to handle more instructions. Here we only distinguish between return and all other insns
+        // to handle more instructions. Here we only distinguish between return and all other instructions
         // TODO
+        // #skal vi bruge TARGET ADDRESS her?
         val pc_next = or(use_if(is_return, reg_out_b),
                          use_if(!is_return, pc_inc));
-
-
 
 
         /*** MEMORY ***/
         // read from memory if needed
         // (Not used for simulating return, so "mem_out" will be unused initially)
-        // TODO
+        // #Er det ikke forkert at denne er sat mad compute_result!?
         val mem_out = memory_read(mem, compute_result, is_load);
-
-
-
 
 
         /*** WRITE ***/
@@ -318,9 +313,6 @@ int main(int argc, char* argv[]) {
                                  or(use_if(is_movq_reg_to_reg, reg_out_b),
                                     use_if(is_movq_mem_to_reg, mem_out)),
                                  use_if(is(MIN_CALL, minor_op), reg_out_b)); // skal være call !?
-
-
-
 
 
 
