@@ -73,11 +73,6 @@
 #define LEGAL_SHIFT    (is(0x0, shift_amount1) || is(0x1, shift_amount1) || is(0x2, shift_amount1) || is(0x3, shift_amount1))
 #define COND           (is(0xF, major_op) || (is(CFLOW_CALL_JMP, major_op) && !(is(MIN_JMP,minor_op) || is(MIN_CALL, minor_op))))
 
-
-
-
-
-
 int main(int argc, char* argv[]) {
     // Check command line parameters.
     if (argc < 2)
@@ -162,8 +157,6 @@ int main(int argc, char* argv[]) {
                         or(put_bits(8, 8, immByte4),
                            put_bits(0, 8, immByte3)));
 
-
-
         // bit target adress (PP..32..PP in encoding.txt)
         val target2_5 = or(
                         or(put_bits(24, 8, immByte5),
@@ -177,6 +170,8 @@ int main(int argc, char* argv[]) {
                         or(put_bits(8, 8, immByte4),
                            put_bits(0, 8, immByte3)));
 
+        // TODO
+        // hvor skal target address bruges?
         val target_adress = or(use_if(TARGET_IN_2_5, target2_5),
                                (use_if(TARGET_IN_3_6, target3_6)));
 
@@ -223,7 +218,8 @@ int main(int argc, char* argv[]) {
         // definite codes for arithmetic
         bool is_imm_arimetic= is(IMM_ARITHMETIC, major_op);
         bool is_add = (is_arithmetic && is(0x0, minor_op));
-        bool is_sub = (is_arithmetic && is(0x1, minor_op));
+        // alu_op needs to be sub if we use a condition
+        bool is_sub = ((is_arithmetic && is(0x1, minor_op)) || COND) ;
         bool is_and = (is_arithmetic && is(0x2, minor_op));
         bool is_or  = (is_arithmetic && is(0x3, minor_op));
         bool is_xor = (is_arithmetic && is(0x4, minor_op));
@@ -243,7 +239,6 @@ int main(int argc, char* argv[]) {
 
 
         // determine instruction size
-        // TODO
         val ins_size = or(use_if(( is_return || is_arithmetic || is_leaq2 || is_movq || is_movq_mem), from_int(2)),
                           or(use_if(( is_cflow_call_jump || is_imm_arimetic|| is_imm_movq|| is_imm_movq_mem|| is_leaq6),  from_int(6)),
                              or(use_if(( is_leaq3), from_int(3)), // LEAQ3
@@ -257,7 +252,8 @@ int main(int argc, char* argv[]) {
                        use_if(IMM_IN_3_6,
                               imm3_6));
 
-        // extend sign bit in immediate      #USIKKERT OM VI SKAL DETTE!? se https://absalon.instructure.com/courses/28624/discussion_topics/145619
+        // extend sign bit in immediate
+        // #USIKKERT OM VI SKAL DETTE!? se https://absalon.instructure.com/courses/28624/discussion_topics/145619
         // val imm = sign_extend(31, immUS);
 
         // control signals for memory access - you will want to change these
