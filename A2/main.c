@@ -24,31 +24,38 @@
 #define IMM_MOVQ       0x6
 #define IMM_MOVQ_MEM   0x7
 
+// LEAQ..nr refer to length of instruction
 #define LEAQ2          0x8
 #define LEAQ3          0x9
 #define LEAQ6          0xA
 #define LEAQ7          0xB
 #define IMM_CBRANCH    0xF
 
-// minor opcodes
-// TODO
-#define MIN_REG_REG    0x1
+// MOVQ minor opcodes
+#define MIN_MOVQ_MEM_OR_REG_REG 0x1
+#define MIN_MOVQ_IMM_REG        0x4
+#define MIN_MOVQ_IMM_MEM_REG    0x5
+#define MIN_MOVQ_REG_MEM        0x9
+#define MIN_MOVQ_REG_IMM_MEM    0xD
 
-#define MIN_REG_IMM    0x2
-#define MIN_REG_MEM    0x9
-
-#define MIN_MEM_REG    0x1
-#define MIN_MEM_IMM    0x5
-
-#define MIN_IMM_REG    0x6
-#define MIN_IMM_IMM    0x7
-#define MIN_IMM_MEM    0x8
-
-#define MIN_MOVQ_REG_MEM    0x9
-#define MIN_LEAQ       0xB
+// CALL and JUMP minor opcodes
 #define MIN_CALL       0xE
 #define MIN_JMP        0xF
 
+// LEAQ minor opcodes
+#define MIN_LEAQ_1     0x1
+#define MIN_LEAQ_2     0x2
+#define MIN_LEAQ_3     0x3
+#define MIN_LEAQ_4     0x4
+#define MIN_LEAQ_5     0x5
+#define MIN_LEAQ_6     0x6
+#define MIN_LEAQ_7     0x7
+
+
+
+
+
+// EXTRA MACROES
 // write to reg or to mem
 #define WRITE_TO_REG   (is_movq_reg_to_reg || is_movq_mem_to_reg || is_movq_imm_to_reg)
 #define STORE_IN_MEM   (is(0x9, minor_op) || is(0xD, minor_op))
@@ -63,6 +70,10 @@
 
 #define LEGAL_SHIFT    (is(0x0, shift_amount1) || is(0x1, shift_amount1) || is(0x2, shift_amount1) || is(0x3, shift_amount1))
 #define COND           (is(0xF, major_op) || (is(0x4, major_op) && !MIN_JMP && !MIN_CALL))
+
+
+
+
 
 
 int main(int argc, char* argv[]) {
@@ -156,11 +167,10 @@ int main(int argc, char* argv[]) {
         bool is_arithmetic = is(IMM_ARITHMETIC, major_op) || is(REG_ARITHMETIC, major_op);
 
         // minor encoding "flags"
-        bool is_movq_reg_to_reg = is(MIN_REG_REG, minor_op);
-        // bool is_movq_reg_to_mem = is(MIN_REG_MEM, minor_op);
-        bool is_movq_mem_to_reg = is(MIN_MEM_REG, minor_op);
-        bool is_movq_imm_to_reg = is(MIN_IMM_REG, minor_op);
-        // bool is_movq_imm_to_mem = is(MIN_REG_MEM, minor_op);
+        // TODO, virker mærkeligt, med to ens bool
+        bool is_movq_reg_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op);
+        bool is_movq_mem_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op);
+        bool is_movq_imm_to_reg = is(MIN_MOVQ_IMM_REG, minor_op);
 
         // definite codes for arithmetic
         bool is_add = (is_arithmetic && is(0x0, minor_op));
