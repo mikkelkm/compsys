@@ -1,0 +1,69 @@
+A encoding.txt
+2 x86prime instruction encoding
+3 -----------------------------
+4 00000000 0000ssss ret s
+5 0001aaaa ddddssss register/register arithmic: op s,d (see below)
+6 00100001 ddddssss movq s,d
+7 00110001 ddddssss movq (s),d
+8 00111001 ddddssss movq d,(s)
+9 -
+10 0100cccc ddddssss pp...32...pp cb<c> s,d,p (see below)
+11 01001110 dddd0000 pp...32...pp call p,d
+12 01001111 00000000 pp...32...pp jmp p
+13 0101aaaa dddd0000 ii...32...ii imm/register arithmetic: op i,d (see below)
+14 01100100 dddd0000 ii...32...ii movq $i,d
+15 01110101 ddddssss ii...32...ii movq i(s),d
+16 01111101 ddddssss ii...32...ii movq d,i(s)
+17 -
+18 10000001 ddddssss leaq (s),d
+19 10010010 dddd0000 zzzzvvvv leaq (,z,(1<<v)),d
+20 10010011 ddddssss zzzzvvvv leaq (s,z,(1<<v)),d
+21 10100100 dddd0000 ii...32...ii leaq i,d
+22 10100101 ddddssss ii...32...ii leaq i(s),d
+23 10110110 dddd0000 zzzzvvvv ii...32...ii leaq i(,z,(1<<v)),d
+24 10110111 ddddssss zzzzvvvv ii...32...ii leaq i(s,z,(1<<v)),d
+25 -
+26 1111cccc dddd0000 ii...32...ii pp...32...pp cb<c> $i,d,p (see below)
+27 Explanations:
+28
+29 aaaa indicates the kind of arithmetic operation.
+30 0000 add
+31 0001 sub
+32 0010 and
+33 0011 or
+34 0100 xor
+35 0101 mul
+36
+37 d,s and z are registers.
+38 0000 %rax 1000 %r8
+39 0001 %rbc 1001 %r9
+40 0010 %rcx 1010 %r10
+41 0011 %rdx 1011 %r11
+42 0100 %rbp 1100 %r12
+43 0101 %rsi 1101 %r13
+44 0110 %rdi 1110 %r14
+45 0111 %rsp 1111 %r15
+46
+47 vvvv is a shift amount, only 0000,0001,0010 and 0011 are valid encodings.
+48 When used in assembly, the values is given as scale factors 1,2,4 or 8.
+49
+50 ii...32...ii is a 32 bit signed immediate
+51 pp...32...pp is a 32 bit target address
+52
+53 <c> is a condition mnemonic used in compare-and-branch. The compare-and-branch
+54 instruction cb<c> is not part of the original x86 instruction set.
+55
+56 Example: cble %rdi,%rbp,target = if %rdi <= %rbp then jump to target
+57
+58 Encoding
+59 0000 e 1000 a
+60 0001 ne 1001 ae
+61 0010 <reserved> 1010 b
+62 0011 <reserved> 1011 be
+63 0100 l 1100 <reserved>
+64 0101 le 1101 <reserved>
+65 0110 g 1110 <reserved>
+66 0111 ge 1111 <reserved>
+67
+68 call places the return address in %r15 instead of pushing it onto the stack.
+69 ret returns to the address in %r15 instead of popping it from the stack.
