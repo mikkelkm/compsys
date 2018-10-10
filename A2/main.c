@@ -170,11 +170,8 @@ int main(int argc, char* argv[]) {
 
         // TODO
         // #hvor skal target address bruges?
-        /*
-
         val target_adress = or(use_if(TARGET_IN_2_5, target2_5),
                                (use_if(TARGET_IN_3_6, target3_6)));
-        */
 
         // decode instruction type
 
@@ -187,7 +184,6 @@ int main(int argc, char* argv[]) {
 
         bool is_movq = is(REG_MOVQ, major_op);
         bool is_movq_mem = is(REG_MOVQ_MEM, major_op);
-
 
         bool is_movq_reg_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op) && is_movq_mem;
         bool is_movq_mem_to_reg = is(MIN_MOVQ_MEM_OR_REG_REG, minor_op) && is_movq_mem;
@@ -213,6 +209,7 @@ int main(int argc, char* argv[]) {
         //bool is_leaq7_7 = is(MIN_LEAQ_7, minor_op) && is_leaq7;
 
         // minor encoding "flags"
+
         //bool is_jmp = is(MIN_JMP, minor_op);
         //bool is_call = is(MIN_CALL, minor_op);
 
