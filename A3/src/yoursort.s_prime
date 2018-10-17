@@ -1,0 +1,34 @@
+ERROR: failed:  : 	.macosx_version_min 10, 13
+ERROR: failed:  : _your_sort:                             ## @your_sort
+    movq %rsp, %rbp
+ERROR: failed:  : 	retq
+ERROR: failed:  : _run:                                   ## @run
+    movq %rsp, %rbp
+ERROR: failed:  : 	callq	_init_allocator
+ERROR: failed:  : 	callq	_read_long
+    movq %rax, %r14
+ERROR: failed:  : 	callq	_read_long
+    movq %rax, %rbx
+    movq %rbx, %rdi
+ERROR: failed:  : 	callq	_get_random_array
+    movq %rbx, %rdi
+ERROR: failed:  : 	testb	$2, %r14b
+    jne LBB1_1
+ERROR: failed:  : 	callq	_get_random_array
+    jmp LBB1_3
+LBB1_1:
+ERROR: failed:  : 	callq	_read_array
+LBB1_3:
+    movq %rax, %r15
+ERROR: failed:  : 	testb	$1, %r14b
+    je LBB1_5
+    movq %rbx, %rdi
+    movq %r15, %rsi
+ERROR: failed:  : 	callq	_print_array
+LBB1_5:
+    movq %r15, %rax
+    addq $8, %rsp
+ERROR: failed:  : 	retq
+ERROR: failed:  : 	.comm	_cur_allocator,8,3      ## @cur_allocator
+ERROR: failed:  : 	.comm	_allocator_base,8,3     ## @allocator_base
+

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set path so it matches your installation:
-x86prime=x86prime
+x86prime=/Users/baunbaun/Documents/computersystemer_BAUN/compSys-e2018-pub/tools/x86prime.py
 
 if [ "$#" -ne 2 ]; then
    echo "Running some x86prime programs"
@@ -83,6 +83,7 @@ do
   echo ""
   echo " - sorting" ${elem} "entries"
   echo "   ------------------"
-  ${x86prime} -f ${1}.s_prime -asm $machine -run run < runs/run-${elem}.input > ${datafile}
+  #${x86prime} -f ${1}.s_prime -asm $machine -run run < runs/run-${elem}.input > ${datafile}
+  ${x86prime} -f ${1}.s_prime -asm $machine -run run -input runs/run-${elem}.input > ${datafile}
   cat ${datafile}
 done

@@ -1,7 +1,8 @@
-CC = gcc
+CC = /Users/baunbaun/Documents/computersystemer_BAUN/compSys-e2018-pub/tools/gcc-online.py
 CFLAGS = -Wall -Wextra -pedantic -Winline -Og
 
-X86PRIME = x86prime
+X86PRIME = /Users/baunbaun/Documents/computersystemer_BAUN/compSys-e2018-pub/tools/x86prime.py
+
 
 PROGRAMS = quicksort heapsort yoursort
 

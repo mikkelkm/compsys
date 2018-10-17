@@ -10,7 +10,8 @@ make ${algorithm}
 make quicksort
 
 # The command with which you run x86prime: You should likely change this variable
-X86PRIME=x86prime
+X86PRIME=/Users/baunbaun/Documents/computersystemer_BAUN/compSys-e2018-pub/tools/x86prime.py
+
 
 echo "Generating a test_runs directory.."
 mkdir -p test_runs
