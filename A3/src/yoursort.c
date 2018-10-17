@@ -1,3 +1,5 @@
+/* hvad er kilden til denne algoritme? URL, ophavsmand, virksomhed etc. */
+
 #include "x86prime_lib.h"
 
 void your_sort(long num_elem, long array[]) {

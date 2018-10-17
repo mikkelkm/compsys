@@ -1,34 +1,85 @@
-ERROR: failed:  : 	.macosx_version_min 10, 13
-ERROR: failed:  : _your_sort:                             ## @your_sort
-    movq %rsp, %rbp
-ERROR: failed:  : 	retq
-ERROR: failed:  : _run:                                   ## @run
-    movq %rsp, %rbp
-ERROR: failed:  : 	callq	_init_allocator
-ERROR: failed:  : 	callq	_read_long
-    movq %rax, %r14
-ERROR: failed:  : 	callq	_read_long
-    movq %rax, %rbx
-    movq %rbx, %rdi
-ERROR: failed:  : 	callq	_get_random_array
-    movq %rbx, %rdi
-ERROR: failed:  : 	testb	$2, %r14b
-    jne LBB1_1
-ERROR: failed:  : 	callq	_get_random_array
-    jmp LBB1_3
-LBB1_1:
-ERROR: failed:  : 	callq	_read_array
-LBB1_3:
-    movq %rax, %r15
-ERROR: failed:  : 	testb	$1, %r14b
-    je LBB1_5
-    movq %rbx, %rdi
-    movq %r15, %rsi
-ERROR: failed:  : 	callq	_print_array
-LBB1_5:
-    movq %r15, %rax
+your_sort:
+.LFB8:
+    subq $8, %rsp
+    movq %r11, (%rsp)
+    movq (%rsp), %r11
     addq $8, %rsp
-ERROR: failed:  : 	retq
-ERROR: failed:  : 	.comm	_cur_allocator,8,3      ## @cur_allocator
-ERROR: failed:  : 	.comm	_allocator_base,8,3     ## @allocator_base
+    ret %r11
+run:
+.LFB9:
+    subq $8, %rsp
+    movq %r11, (%rsp)
+    in (0),%rax
+    movq %rax, %r8
+    andq $1, %r8d
+    andq $2, %eax
+    movq %rax, %rdi
+    in (0),%rsi
+    movq %rsi, %rdx
+    salq $3, %rsi
+    leaq allocator_base(%rsi), %rax
+    leaq cur_allocator, %r11
+    movq %rax, (%r11)
+    movq $0, %eax
+    jmp .L3
+.L4:
+    in (1),%rcx
+    leaq allocator_base(, %rax, 8), %r11
+    movq %rcx, (%r11)
+    addq $1, %rax
+.L3:
+    cbl %rax,%rdx,.L4
+    cbe $0,%rdi,.L5
+    leaq cur_allocator, %r11
+    movq (%r11), %rax
+    addq %rax, %rsi
+    leaq cur_allocator, %r11
+    movq %rsi, (%r11)
+    movq $0, %ecx
+    jmp .L6
+.L7:
+    leaq (%rax, %rcx, 8), %rsi
+    in (0),%rdi
+    movq %rdi, (%rsi)
+    addq $1, %rcx
+.L6:
+    cbl %rcx,%rdx,.L7
+    jmp .L8
+.L5:
+    leaq cur_allocator, %r11
+    movq (%r11), %rax
+    addq %rax, %rsi
+    leaq cur_allocator, %r11
+    movq %rsi, (%r11)
+    movq $0, %ecx
+    jmp .L9
+.L10:
+    leaq (%rax, %rcx, 8), %rsi
+    in (1),%rdi
+    movq %rdi, (%rsi)
+    addq $1, %rcx
+.L9:
+    cbl %rcx,%rdx,.L10
+.L8:
+    cbne $0,%r8,.L14
+    movq (%rsp), %r11
+    addq $8, %rsp
+    ret %r11
+.L13:
+    leaq (%rax, %rcx, 8), %r11
+    movq (%r11), %rsi
+    out %rsi,(0)
+    addq $1, %rcx
+    jmp .L11
+.L14:
+    movq $0, %ecx
+.L11:
+    cbl %rcx,%rdx,.L13
+    movq (%rsp), %r11
+    addq $8, %rsp
+    ret %r11
+.LFE8:
+.LFE9:
+    .comm allocator_base,8,8
+    .comm cur_allocator,8,8
 

@@ -1,70 +1,111 @@
-	.section	__TEXT,__text,regular,pure_instructions
-	.macosx_version_min 10, 13
-	.globl	_your_sort              ## -- Begin function your_sort
-	.p2align	4, 0x90
-_your_sort:                             ## @your_sort
+	.file	"6dab49d06167be7d4d501abb09dc86fc.c"
+	.text
+	.globl	your_sort
+	.type	your_sort, @function
+your_sort:
+.LFB8:
 	.cfi_startproc
-## %bb.0:
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset %rbp, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register %rbp
-	popq	%rbp
-	retq
+	rep ret
 	.cfi_endproc
-                                        ## -- End function
-	.globl	_run                    ## -- Begin function run
-	.p2align	4, 0x90
-_run:                                   ## @run
+.LFE8:
+	.size	your_sort, .-your_sort
+	.globl	run
+	.type	run, @function
+run:
+.LFB9:
 	.cfi_startproc
-## %bb.0:
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset %rbp, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register %rbp
-	pushq	%r15
-	pushq	%r14
-	pushq	%rbx
-	pushq	%rax
-	.cfi_offset %rbx, -40
-	.cfi_offset %r14, -32
-	.cfi_offset %r15, -24
-	callq	_init_allocator
-	callq	_read_long
-	movq	%rax, %r14
-	callq	_read_long
-	movq	%rax, %rbx
-	movq	%rbx, %rdi
-	callq	_get_random_array
-	movq	%rbx, %rdi
-	testb	$2, %r14b
-	jne	LBB1_1
-## %bb.2:
-	callq	_get_random_array
-	jmp	LBB1_3
-LBB1_1:
-	callq	_read_array
-LBB1_3:
-	movq	%rax, %r15
-	testb	$1, %r14b
-	je	LBB1_5
-## %bb.4:
-	movq	%rbx, %rdi
-	movq	%r15, %rsi
-	callq	_print_array
-LBB1_5:
-	movq	%r15, %rax
-	addq	$8, %rsp
-	popq	%rbx
-	popq	%r14
-	popq	%r15
-	popq	%rbp
-	retq
+#APP
+# 6 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
+	in (0),%rax
+# 0 "" 2
+#NO_APP
+	movq	%rax, %r8
+	andl	$1, %r8d
+	andl	$2, %eax
+	movq	%rax, %rdi
+#APP
+# 6 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
+	in (0),%rsi
+# 0 "" 2
+#NO_APP
+	movq	%rsi, %rdx
+	salq	$3, %rsi
+	leaq	allocator_base(%rsi), %rax
+	movq	%rax, cur_allocator(%rip)
+	movl	$0, %eax
+	jmp	.L3
+.L4:
+#APP
+# 12 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
+	in (1),%rcx
+# 0 "" 2
+#NO_APP
+	movq	%rcx, allocator_base(,%rax,8)
+	addq	$1, %rax
+.L3:
+	cmpq	%rax, %rdx
+	jg	.L4
+	testq	%rdi, %rdi
+	je	.L5
+	movq	cur_allocator(%rip), %rax
+	addq	%rax, %rsi
+	movq	%rsi, cur_allocator(%rip)
+	movl	$0, %ecx
+	jmp	.L6
+.L7:
+	leaq	(%rax,%rcx,8), %rsi
+#APP
+# 6 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
+	in (0),%rdi
+# 0 "" 2
+#NO_APP
+	movq	%rdi, (%rsi)
+	addq	$1, %rcx
+.L6:
+	cmpq	%rcx, %rdx
+	jg	.L7
+	jmp	.L8
+.L5:
+	movq	cur_allocator(%rip), %rax
+	addq	%rax, %rsi
+	movq	%rsi, cur_allocator(%rip)
+	movl	$0, %ecx
+	jmp	.L9
+.L10:
+	leaq	(%rax,%rcx,8), %rsi
+#APP
+# 12 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
+	in (1),%rdi
+# 0 "" 2
+#NO_APP
+	movq	%rdi, (%rsi)
+	addq	$1, %rcx
+.L9:
+	cmpq	%rcx, %rdx
+	jg	.L10
+.L8:
+	testq	%r8, %r8
+	jne	.L14
+	rep ret
+.L13:
+	movq	(%rax,%rcx,8), %rsi
+#APP
+# 17 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
+	out %rsi,(0)
+# 0 "" 2
+#NO_APP
+	addq	$1, %rcx
+	jmp	.L11
+.L14:
+	movl	$0, %ecx
+.L11:
+	cmpq	%rcx, %rdx
+	jg	.L13
+	rep ret
 	.cfi_endproc
-                                        ## -- End function
-	.comm	_cur_allocator,8,3      ## @cur_allocator
-	.comm	_allocator_base,8,3     ## @allocator_base
-
-.subsections_via_symbols
+.LFE9:
+	.size	run, .-run
+	.comm	allocator_base,8,8
+	.comm	cur_allocator,8,8
+	.ident	"GCC: (Ubuntu 5.4.0-6ubuntu1~16.04.10) 5.4.0 20160609"
+	.section	.note.GNU-stack,"",@progbits

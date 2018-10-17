@@ -1,7 +1,7 @@
 #!/bin/sh
 
 machines=(baseline memory simple superscalar ooo)
-algorithms=(quicksort heapsort) # yoursort)
+algorithms=(quicksort heapsort yoursort)
 
 
 for algo in "${algorithms[@]}"
