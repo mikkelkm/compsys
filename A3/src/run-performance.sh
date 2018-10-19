@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Set path so it matches your installation:
+# This is set to Baun's path to .py solution of x86prime
 x86prime=/Users/baunbaun/Documents/computersystemer_BAUN/compSys-e2018-pub/tools/x86prime.py
 
 if [ "$#" -ne 2 ]; then
@@ -27,9 +28,13 @@ if [[ "${algorithm}" == "" ]]; then
   exit 1;
 fi
 
-# Machine definitions
+# MACHINE DEFINITIONS
+
+# The baseline setting with magic cache. It is a very large L1 cache. For assignment 1.2.1
 baseline="-mem magic -pipe simple"
+# The setting for testing realistically caches (3 caches). For assignment 1.2.2
 memory="-mem real -pipe simple"
+# The 3 microarchitectures for assignment 1.2.3
 simple="-mem real -pipe simple"
 superscalar="-mem real -pipe super"
 ooo="-mem real -pipe ooo"
@@ -64,7 +69,8 @@ mkdir -p runs
 rm -f runs/*
 
 # Number for elements to be sorted (to be extended)
-elements="10 100 1000"
+# Extended with n = 100000
+elements="10 100 1000 100000"
 
 # Generate files with inputs for things to be sorted
 for elem in ${elements}
@@ -84,6 +90,7 @@ do
   echo " - sorting" ${elem} "entries"
   echo "   ------------------"
   #${x86prime} -f ${1}.s_prime -asm $machine -run run < runs/run-${elem}.input > ${datafile}
+  # Below is the way to run with .py solution. The Line above is when you run local.
   ${x86prime} -f ${1}.s_prime -asm $machine -run run -input runs/run-${elem}.input > ${datafile}
   cat ${datafile}
 done
