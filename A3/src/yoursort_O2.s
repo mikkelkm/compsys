@@ -1,295 +1,221 @@
 	.file	"yoursort.c"
 	.text
 	.p2align 4,,15
-	.globl	merge
-	.type	merge, @function
-merge:
-.LFB32:
+	.globl	quick_sort
+	.type	quick_sort, @function
+quick_sort:
+.LFB8:
 	.cfi_startproc
-	subq	$424, %rsp
-	.cfi_def_cfa_offset 432
-	movq	%rsi, %r9
-	movq	%fs:40, %rax
-	movq	%rax, 408(%rsp)
-	xorl	%eax, %eax
-.L2:
-	cmpq	%rdx, %r9
-	jg	.L14
-.L23:
-	cmpq	%r8, %rcx
-	jg	.L14
-	movq	(%rdi,%r9,8), %r11
-	movq	(%rdi,%rcx,8), %r10
-	addq	$1, %rax
-	cmpq	%r10, %r11
-	jge	.L3
-	addq	$1, %r9
-	movq	%r11, -8(%rsp,%rax,8)
-	cmpq	%rdx, %r9
-	jle	.L23
-.L14:
-	cmpq	%rdx, %r9
-	jg	.L7
-	leaq	1(%rax,%rdx), %r10
-	movq	%rsp, %rdx
-	subq	%r9, %r10
-	subq	%rax, %r9
-	leaq	(%rdi,%r9,8), %r9
-	.p2align 4,,10
-	.p2align 3
-.L8:
-	addq	$1, %rax
-	movq	-8(%r9,%rax,8), %rcx
-	cmpq	%rax, %r10
-	movq	%rcx, -8(%rdx,%rax,8)
-	jne	.L8
-.L9:
-	cmpq	%r8, %rsi
-	jg	.L1
-	addq	$1, %r8
-	xorl	%eax, %eax
-	movq	%rsp, %rdx
-	subq	%rsi, %r8
-	leaq	(%rdi,%rsi,8), %rsi
-.L12:
-	movq	(%rdx,%rax,8), %rcx
-	movq	%rcx, (%rsi,%rax,8)
-	addq	$1, %rax
-	cmpq	%rax, %r8
-	jne	.L12
-.L1:
-	movq	408(%rsp), %rax
-	xorq	%fs:40, %rax
-	jne	.L24
-	addq	$424, %rsp
-	.cfi_remember_state
-	.cfi_def_cfa_offset 8
-	ret
+	cmpq	%rdx, %rsi
+	jge	.L11
+	pushq	%r13
+	.cfi_def_cfa_offset 16
+	.cfi_offset 13, -16
+	pushq	%r12
+	.cfi_def_cfa_offset 24
+	.cfi_offset 12, -24
+	movq	%rdx, %r13
+	pushq	%rbp
+	.cfi_def_cfa_offset 32
+	.cfi_offset 6, -32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	.cfi_offset 3, -40
+	leaq	1(%rdx), %rbx
+	movq	%rdi, %r12
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 48
+.L7:
+	leaq	(%rsi,%r13), %rax
+	leaq	-1(%rsi), %r8
+	movq	%rbx, %rbp
+	sarq	%rax
+	movq	(%r12,%rax,8), %rdi
 	.p2align 4,,10
 	.p2align 3
 .L3:
-	.cfi_restore_state
-	addq	$1, %rcx
-	movq	%r10, -8(%rsp,%rax,8)
-	jmp	.L2
+	addq	$1, %r8
+	movq	(%r12,%r8,8), %r10
+	cmpq	%rdi, %r10
+	jl	.L3
+	leaq	-1(%rbp), %rdx
+	leaq	(%r12,%rdx,8), %rax
+	jmp	.L5
 	.p2align 4,,10
 	.p2align 3
-.L7:
-	cmpq	%r8, %rcx
-	jg	.L9
-	leaq	1(%rax,%r8), %r9
-	movq	%rsp, %rdx
-	subq	%rcx, %r9
-	subq	%rax, %rcx
-	leaq	(%rdi,%rcx,8), %r10
+.L8:
+	movq	%rdx, %rbp
+	subq	$1, %rdx
+.L5:
+	movq	%rax, %r9
+	subq	$8, %rax
+	movq	8(%rax), %rcx
+	cmpq	%rdi, %rcx
+	jg	.L8
+	cmpq	%rdx, %r8
+	jge	.L6
+	movq	%rcx, (%r12,%r8,8)
+	movq	%rdx, %rbp
+	movq	%r10, (%r9)
+	jmp	.L3
 	.p2align 4,,10
 	.p2align 3
-.L10:
-	addq	$1, %rax
-	movq	-8(%r10,%rax,8), %rcx
-	cmpq	%r9, %rax
-	movq	%rcx, -8(%rdx,%rax,8)
-	jne	.L10
-	jmp	.L9
-.L24:
-	call	__stack_chk_fail@PLT
-	.cfi_endproc
-.LFE32:
-	.size	merge, .-merge
-	.p2align 4,,15
-	.type	merge_sort.part.0, @function
-merge_sort.part.0:
-.LFB34:
-	.cfi_startproc
-	pushq	%r14
-	.cfi_def_cfa_offset 16
-	.cfi_offset 14, -16
-	pushq	%r13
-	.cfi_def_cfa_offset 24
-	.cfi_offset 13, -24
-	movq	%rdx, %r13
-	pushq	%r12
-	.cfi_def_cfa_offset 32
-	.cfi_offset 12, -32
-	pushq	%rbp
+.L6:
+	movq	%r12, %rdi
+	call	quick_sort
+	cmpq	%rbp, %r13
+	movq	%rbp, %rsi
+	jg	.L7
+	addq	$8, %rsp
 	.cfi_def_cfa_offset 40
-	.cfi_offset 6, -40
-	movq	%rdi, %rbp
-	pushq	%rbx
-	.cfi_def_cfa_offset 48
-	.cfi_offset 3, -48
-	leaq	(%rsi,%rdx), %rbx
-	movq	%rsi, %r12
-	sarq	%rbx
-	leaq	1(%rbx), %r14
-	movq	%rbx, %rdx
-	call	merge_sort
-	movq	%r13, %rdx
-	movq	%r14, %rsi
-	movq	%rbp, %rdi
-	call	merge_sort
-	movq	%r13, %r8
-	movq	%r14, %rcx
-	movq	%rbx, %rdx
-	movq	%r12, %rsi
-	movq	%rbp, %rdi
 	popq	%rbx
-	.cfi_def_cfa_offset 40
-	popq	%rbp
 	.cfi_def_cfa_offset 32
-	popq	%r12
+	popq	%rbp
 	.cfi_def_cfa_offset 24
-	popq	%r13
+	popq	%r12
 	.cfi_def_cfa_offset 16
-	popq	%r14
+	popq	%r13
 	.cfi_def_cfa_offset 8
-	jmp	merge
-	.cfi_endproc
-.LFE34:
-	.size	merge_sort.part.0, .-merge_sort.part.0
-	.p2align 4,,15
-	.globl	merge_sort
-	.type	merge_sort, @function
-merge_sort:
-.LFB31:
-	.cfi_startproc
-	cmpq	%rdx, %rsi
-	jl	.L29
+	ret
+.L11:
+	.cfi_restore 3
+	.cfi_restore 6
+	.cfi_restore 12
+	.cfi_restore 13
 	rep ret
-	.p2align 4,,10
-	.p2align 3
-.L29:
-	jmp	merge_sort.part.0
 	.cfi_endproc
-.LFE31:
-	.size	merge_sort, .-merge_sort
+.LFE8:
+	.size	quick_sort, .-quick_sort
 	.p2align 4,,15
 	.globl	run
 	.type	run, @function
 run:
-.LFB33:
+.LFB9:
 	.cfi_startproc
-	pushq	%r12
-	.cfi_def_cfa_offset 16
-	.cfi_offset 12, -16
 	pushq	%rbp
-	.cfi_def_cfa_offset 24
-	.cfi_offset 6, -24
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
 	pushq	%rbx
+	.cfi_def_cfa_offset 24
+	.cfi_offset 3, -24
+	subq	$8, %rsp
 	.cfi_def_cfa_offset 32
-	.cfi_offset 3, -32
 #APP
 # 6 "x86prime_lib.h" 1
 	in (0),%rax
 # 0 "" 2
 #NO_APP
-	movq	%rax, %rbp
+	movq	%rax, %rbx
 	andl	$2, %eax
-	andl	$1, %ebp
+	andl	$1, %ebx
 #APP
 # 6 "x86prime_lib.h" 1
-	in (0),%r12
+	in (0),%rbp
 # 0 "" 2
 #NO_APP
-	leaq	allocator_base(%rip), %rdx
-	leaq	0(,%r12,8), %rcx
-	testq	%r12, %r12
-	leaq	(%rcx,%rdx), %rbx
-	jle	.L31
-	movq	%rax, %rsi
+	leaq	allocator_base(%rip), %rcx
+	leaq	0(,%rbp,8), %rsi
+	testq	%rbp, %rbp
+	leaq	(%rsi,%rcx), %r11
+	jle	.L16
+	movq	%rax, %rdx
 	.p2align 4,,10
 	.p2align 3
-.L32:
+.L17:
 #APP
 # 12 "x86prime_lib.h" 1
 	in (1),%rax
 # 0 "" 2
 #NO_APP
-	movq	%rax, (%rdx)
-	addq	$8, %rdx
-	cmpq	%rdx, %rbx
-	jne	.L32
-	testq	%rsi, %rsi
-	leaq	(%rbx,%rcx), %rdx
-	je	.L52
-	movq	%rdx, cur_allocator(%rip)
-	movq	%rbx, %rax
+	movq	%rax, (%rcx)
+	addq	$8, %rcx
+	cmpq	%rcx, %r11
+	jne	.L17
+	testq	%rdx, %rdx
+	leaq	(%r11,%rsi), %rcx
+	je	.L37
+	movq	%rcx, cur_allocator(%rip)
+	movq	%r11, %rax
 	.p2align 4,,10
 	.p2align 3
-.L36:
+.L21:
 #APP
 # 6 "x86prime_lib.h" 1
-	in (0),%rcx
+	in (0),%rdx
 # 0 "" 2
 #NO_APP
-	movq	%rcx, (%rax)
+	movq	%rdx, (%rax)
 	addq	$8, %rax
-	cmpq	%rdx, %rax
-	jne	.L36
-.L37:
+	cmpq	%rax, %rcx
+	jne	.L21
+.L22:
+	leaq	-1(%rbp), %rdx
 	xorl	%esi, %esi
-	movq	%r12, %rdx
-	movq	%rbx, %rdi
-	call	merge_sort.part.0
+	movq	%r11, %rdi
+	call	quick_sort
 	xorl	%eax, %eax
-	testq	%rbp, %rbp
-	je	.L30
+	testq	%rbx, %rbx
+	je	.L15
 	.p2align 4,,10
 	.p2align 3
-.L39:
-	movq	(%rbx,%rax,8), %rdx
+.L24:
+	movq	(%r11,%rax,8), %rdx
 #APP
 # 17 "x86prime_lib.h" 1
 	out %rdx,(0)
 # 0 "" 2
 #NO_APP
 	addq	$1, %rax
-	cmpq	%rax, %r12
-	jg	.L39
-.L30:
-	movq	%rbx, %rax
-	popq	%rbx
+	cmpq	%rax, %rbp
+	jg	.L24
+.L15:
+	addq	$8, %rsp
 	.cfi_remember_state
 	.cfi_def_cfa_offset 24
-	popq	%rbp
+	movq	%r11, %rax
+	popq	%rbx
 	.cfi_def_cfa_offset 16
-	popq	%r12
+	popq	%rbp
 	.cfi_def_cfa_offset 8
 	ret
 	.p2align 4,,10
 	.p2align 3
-.L52:
+.L37:
 	.cfi_restore_state
-	movq	%rdx, cur_allocator(%rip)
-	movq	%rbx, %rax
+	movq	%rcx, cur_allocator(%rip)
+	movq	%r11, %rax
 	.p2align 4,,10
 	.p2align 3
-.L38:
+.L23:
 #APP
 # 12 "x86prime_lib.h" 1
-	in (1),%rcx
+	in (1),%rdx
 # 0 "" 2
 #NO_APP
-	movq	%rcx, (%rax)
+	movq	%rdx, (%rax)
 	addq	$8, %rax
-	cmpq	%rdx, %rax
-	jne	.L38
-	jmp	.L37
+	cmpq	%rcx, %rax
+	jne	.L23
+	jmp	.L22
 	.p2align 4,,10
 	.p2align 3
-.L31:
-	leaq	(%rbx,%rcx), %rdx
-	movq	%rbx, %rax
-	popq	%rbx
+.L16:
+	leaq	(%r11,%rsi), %rcx
+	leaq	-1(%rbp), %rdx
+	xorl	%esi, %esi
+	movq	%r11, %rdi
+	movq	%rcx, cur_allocator(%rip)
+	call	quick_sort
+	addq	$8, %rsp
 	.cfi_def_cfa_offset 24
-	movq	%rdx, cur_allocator(%rip)
-	popq	%rbp
+	movq	%r11, %rax
+	popq	%rbx
 	.cfi_def_cfa_offset 16
-	popq	%r12
+	popq	%rbp
 	.cfi_def_cfa_offset 8
 	ret
 	.cfi_endproc
-.LFE33:
+.LFE9:
 	.size	run, .-run
 	.comm	allocator_base,8,8
 	.comm	cur_allocator,8,8
