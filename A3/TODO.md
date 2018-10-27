@@ -11,8 +11,8 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 **1.2.2 BAUN**
 - [x] 1 graf med cache miss for de 3 algoritmer
-- [ ] Beregn AMAT
-- [ ] 1 graf med AMAT for de 3 algoritmer
+- [x] Beregn AMAT
+- [x] 1 graf med AMAT for de 3 algoritmer
 - [ ] Siger disse målinger noget om god/dårlig rummelig lokalitet hos de 3 algoritmer
 
 
@@ -28,10 +28,10 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 **2.1 NIKLAS**
-- [ ] sp. 1
-- [ ] sp. 2
-- [ ] sp. 3
-- [ ] sp. 4
+- [x] sp. 1
+- [x] sp. 2
+- [x] sp. 3
+- [x] sp. 4
 
 
 **2.2 MADS**
@@ -41,7 +41,7 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 **Miscellaneous**
-- [ ] Start rapport
+- [x] Start rapport
 - [ ] ...
 - [ ] ...
 - [ ] Aflever på Absalon
