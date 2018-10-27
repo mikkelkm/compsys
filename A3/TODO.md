@@ -17,7 +17,7 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 **1.2.3 BAUN**
-- [ ] 1 graf med køretider for 3 maskiner, der kører hver kører 3 algoritmer
+- [x] 1 graf med køretider for 3 maskiner, der kører hver kører 3 algoritmer
 - [ ] Hvad siger denne graf om de 3 maskiner?
 
 
