@@ -3,9 +3,9 @@ TODO in A3
 HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 **1.2.1**
-- [x] 1 graf med køretid for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-100000) 
-- [x] 1 graf med køretid/element for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-100000) 
-- [x] 1 graf med køretid for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-100000) 
+- [x] 1 graf med køretid for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-10000) 
+- [x] 1 graf med køretid/element for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-10000) 
+- [x] 1 graf med køretid for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-10000) 
 - [ ] underbygger graferne O(n log n)?
 
 
@@ -27,17 +27,17 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 - [ ] *resten er besvaret i løsningerne ovenfor*
 
 
-**2.1**
+**2.1 NIKLAS**
 - [ ] sp. 1
 - [ ] sp. 2
 - [ ] sp. 3
 - [ ] sp. 4
 
 
-**2.2**
-- [ ] sp. 1
-- [ ] sp. 2
-- [ ] sp. 3
+**2.2 MADS**
+- [x] sp. 1
+- [x] sp. 2
+- [x] sp. 3
 
 
 **Miscellaneous**
