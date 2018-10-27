@@ -23,6 +23,9 @@ fi
 if [[ "${1}" == "yoursort" ]]; then
   algorithm="yoursort"
 fi
+if [[ "${1}" == "yoursort_OPT" ]]; then
+  algorithm="yoursort_OPT"
+fi
 if [[ "${algorithm}" == "" ]]; then
   echo "Algorithm set to unknown value: ${1}"
   exit 1;
@@ -60,17 +63,15 @@ if [[ "${machine}" == "" ]]; then
   exit 1;
 fi
 
-
 # Make sure code is up to date
-make $1
+# make $1
 
 # Create for runs
 mkdir -p runs
 rm -f runs/*
 
 # Number for elements to be sorted (to be extended)
-# Extended with n = 100000
-elements="10 100 1000 100000"
+elements="10 100 1000 10000"
 
 # Generate files with inputs for things to be sorted
 for elem in ${elements}
@@ -78,7 +79,7 @@ do
   printf "0\n${elem}\n" > runs/run-${elem}.input
 done
 
-echo "Machine"
+echo "Machine:" ${2}
 echo "-------"
 echo ""
 echo "Sorting with" ${1}
@@ -90,7 +91,7 @@ do
   echo " - sorting" ${elem} "entries"
   echo "   ------------------"
   #${x86prime} -f ${1}.s_prime -asm $machine -run run < runs/run-${elem}.input > ${datafile}
-  # Below is the way to run with .py solution. The Line above is when you run local.
+  # Below is the way to run with .py solution. The line above is when you run local.
   ${x86prime} -f ${1}.s_prime -asm $machine -run run -input runs/run-${elem}.input > ${datafile}
   cat ${datafile}
 done
