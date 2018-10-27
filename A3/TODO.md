@@ -22,8 +22,8 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 **1.3 BAUN**
-- [ ] ret vores mergesort til og skriv reference
-- [ ] vis den sorterer korrekt (run-test.sh)
+- [ ] optimere vores quicksort/yoursort
+- [ ] vis at den sorterer korrekt (run-test.sh)
 - [ ] *resten er besvaret i løsningerne ovenfor*
 
 
