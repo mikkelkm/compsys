@@ -11,8 +11,8 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 **1.2.2 BAUN**
 - [x] 1 graf med cache miss for de 3 algoritmer
-- [ ] Beregn AMAT
-- [ ] 1 graf med AMAT for de 3 algoritmer
+- [x] Beregn AMAT
+- [x] 1 graf med AMAT for de 3 algoritmer
 - [ ] Siger disse målinger noget om god/dårlig rummelig lokalitet hos de 3 algoritmer
 
 
