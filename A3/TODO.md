@@ -44,7 +44,7 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 - [x] Start rapport
 - [ ] ...
 - [ ] ...
-- [ ] Aflever på Absalon
+- [x] Aflever på Absalon
 
 
 
