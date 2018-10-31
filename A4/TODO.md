@@ -1,5 +1,8 @@
 HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
+
+
+
 **Task 1: Implementing the API (25%)**
 - [ ] ?
 - [ ] ?
@@ -8,10 +11,10 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 **Task 2: Write Test Programs (25%)**
-- [ ] ?
-- [ ] ?
-- [ ] ?
-- [ ] ?
+- [ ] test
+- [ ] test
+- [ ] test
+- [ ] test
 
 **Task 3: Small Report**
 - [ ] Start rapport
