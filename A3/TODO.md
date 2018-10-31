@@ -6,7 +6,7 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 - [x] 1 graf med køretid for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-10000) 
 - [x] 1 graf med køretid/element for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-10000) 
 - [x] 1 graf med køretid for 3 algoritmer med 4 data punkter, som er størrelser af N (10-100-1000-10000) 
-- [ ] underbygger graferne O(n log n)?
+- [x] underbygger graferne O(n log n)?
 
 
 **1.2.2 BAUN**
@@ -18,13 +18,13 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 **1.2.3 BAUN**
 - [x] 1 graf med køretider for 3 maskiner, der kører hver kører 3 algoritmer
-- [ ] Hvad siger denne graf om de 3 maskiner?
+- [x] Hvad siger denne graf om de 3 maskiner?
 
 
 **1.3 BAUN**
-- [ ] optimere vores quicksort/yoursort
-- [ ] vis at den sorterer korrekt (run-test.sh)
-- [ ] *resten er besvaret i løsningerne ovenfor*
+- [x] optimere vores quicksort/yoursort
+- [x] vis at den sorterer korrekt (run-test.sh)
+- [x] *resten er besvaret i løsningerne ovenfor*
 
 
 **2.1 NIKLAS**
@@ -44,7 +44,7 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 - [x] Start rapport
 - [ ] ...
 - [ ] ...
-- [ ] Aflever på Absalon
+- [x] Aflever på Absalon
 
 
 
