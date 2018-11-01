@@ -6,4 +6,5 @@
 | Machine architecture |    |    |  1 |  X |    |    |    |    |
 | Operating System     |    |    |    |    |  X |  X |    |    |
 | Computer network     |    |    |    |    |    |    |  X |  X |
-| **Result**           |    7    |    1    |         |         |
+| **% per part**       |INT | 87%| ARK| 13%| OS | 0% | CN | 0% |
+
