@@ -1,40 +1,105 @@
-	.file	"6dab49d06167be7d4d501abb09dc86fc.c"
+	.file	"b887a3f6645dfa2354e9d4df28fa0bfc.c"
 	.text
-	.globl	your_sort
-	.type	your_sort, @function
-your_sort:
+	.globl	quick_sort
+	.type	quick_sort, @function
+quick_sort:
 .LFB8:
 	.cfi_startproc
+	cmpq	%rdx, %rsi
+	jge	.L10
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	leaq	(%rsi,%rdx), %rax
+	sarq	%rax
+	movq	(%rdi,%rax,8), %r9
+	leaq	-1(%rsi), %r10
+	leaq	1(%rdx), %rbx
+.L3:
+	addq	$1, %r10
+	leaq	(%rdi,%r10,8), %rbp
+	movq	0(%rbp), %r11
+	cmpq	%r11, %r9
+	jg	.L3
+	jmp	.L5
+.L7:
+	movq	%rax, %rbx
+.L5:
+	leaq	-1(%rbx), %rax
+	leaq	(%rdi,%rax,8), %rcx
+	movq	(%rcx), %r8
+	cmpq	%r8, %r9
+	jl	.L7
+	cmpq	%rax, %r10
+	jge	.L6
+	movq	%r8, 0(%rbp)
+	movq	%r11, (%rcx)
+	movq	%rax, %rbx
+	jmp	.L3
+.L6:
+	movq	%rdx, %r12
+	movq	%rdi, %rbp
+	movq	%rax, %rdx
+	call	quick_sort
+	movq	%r12, %rdx
+	movq	%rbx, %rsi
+	movq	%rbp, %rdi
+	call	quick_sort
+	popq	%rbx
+	.cfi_restore 3
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 8
+.L10:
 	rep ret
 	.cfi_endproc
 .LFE8:
-	.size	your_sort, .-your_sort
+	.size	quick_sort, .-quick_sort
 	.globl	run
 	.type	run, @function
 run:
 .LFB9:
 	.cfi_startproc
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
 #APP
 # 6 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
 	in (0),%rax
 # 0 "" 2
 #NO_APP
-	movq	%rax, %r8
-	andl	$1, %r8d
+	movq	%rax, %r12
+	andl	$1, %r12d
 	andl	$2, %eax
 	movq	%rax, %rdi
 #APP
 # 6 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
-	in (0),%rsi
+	in (0),%rdx
 # 0 "" 2
 #NO_APP
-	movq	%rsi, %rdx
-	salq	$3, %rsi
+	movq	%rdx, %rbx
+	leaq	0(,%rdx,8), %rsi
 	leaq	allocator_base(%rsi), %rax
 	movq	%rax, cur_allocator(%rip)
 	movl	$0, %eax
-	jmp	.L3
-.L4:
+	jmp	.L12
+.L13:
 #APP
 # 12 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
 	in (1),%rcx
@@ -42,66 +107,78 @@ run:
 #NO_APP
 	movq	%rcx, allocator_base(,%rax,8)
 	addq	$1, %rax
-.L3:
-	cmpq	%rax, %rdx
-	jg	.L4
+.L12:
+	cmpq	%rax, %rbx
+	jg	.L13
 	testq	%rdi, %rdi
-	je	.L5
-	movq	cur_allocator(%rip), %rax
-	addq	%rax, %rsi
+	je	.L14
+	movq	cur_allocator(%rip), %rbp
+	addq	%rbp, %rsi
 	movq	%rsi, cur_allocator(%rip)
-	movl	$0, %ecx
-	jmp	.L6
-.L7:
-	leaq	(%rax,%rcx,8), %rsi
+	movl	$0, %eax
+	jmp	.L15
+.L16:
+	leaq	0(%rbp,%rax,8), %rcx
 #APP
 # 6 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
-	in (0),%rdi
+	in (0),%rsi
 # 0 "" 2
 #NO_APP
-	movq	%rdi, (%rsi)
-	addq	$1, %rcx
-.L6:
-	cmpq	%rcx, %rdx
-	jg	.L7
-	jmp	.L8
-.L5:
-	movq	cur_allocator(%rip), %rax
-	addq	%rax, %rsi
+	movq	%rsi, (%rcx)
+	addq	$1, %rax
+.L15:
+	cmpq	%rax, %rbx
+	jg	.L16
+	jmp	.L17
+.L14:
+	movq	cur_allocator(%rip), %rbp
+	addq	%rbp, %rsi
 	movq	%rsi, cur_allocator(%rip)
-	movl	$0, %ecx
-	jmp	.L9
-.L10:
-	leaq	(%rax,%rcx,8), %rsi
+	movl	$0, %eax
+	jmp	.L18
+.L19:
+	leaq	0(%rbp,%rax,8), %rcx
 #APP
 # 12 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
-	in (1),%rdi
+	in (1),%rsi
 # 0 "" 2
 #NO_APP
-	movq	%rdi, (%rsi)
-	addq	$1, %rcx
-.L9:
-	cmpq	%rcx, %rdx
-	jg	.L10
-.L8:
-	testq	%r8, %r8
-	jne	.L14
-	rep ret
-.L13:
-	movq	(%rax,%rcx,8), %rsi
+	movq	%rsi, (%rcx)
+	addq	$1, %rax
+.L18:
+	cmpq	%rax, %rbx
+	jg	.L19
+.L17:
+	subq	$1, %rdx
+	movl	$0, %esi
+	movq	%rbp, %rdi
+	call	quick_sort
+	testq	%r12, %r12
+	jne	.L23
+	jmp	.L21
+.L22:
+	movq	0(%rbp,%rax,8), %rdx
 #APP
 # 17 "/home/pirc/public_compsys17/gcc_runs/x86prime_lib.h" 1
-	out %rsi,(0)
+	out %rdx,(0)
 # 0 "" 2
 #NO_APP
-	addq	$1, %rcx
-	jmp	.L11
-.L14:
-	movl	$0, %ecx
-.L11:
-	cmpq	%rcx, %rdx
-	jg	.L13
-	rep ret
+	addq	$1, %rax
+	jmp	.L20
+.L23:
+	movl	$0, %eax
+.L20:
+	cmpq	%rax, %rbx
+	jg	.L22
+.L21:
+	movq	%rbp, %rax
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
 	.cfi_endproc
 .LFE9:
 	.size	run, .-run

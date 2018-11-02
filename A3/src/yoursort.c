@@ -1,11 +1,28 @@
-/* hvad er kilden til denne algoritme? URL, ophavsmand, virksomhed etc. */
-
 #include "x86prime_lib.h"
 
-void your_sort(long num_elem, long array[]) {
-  return;
-}
+void quick_sort(long array[], long lo, long hi) {
+  if (lo >= hi) return;
 
+  long mid = (lo + hi) >> 1;
+  long pivot = array[mid];
+  long left = lo - 1;
+  long right = hi + 1;
+  while (1) {
+    do {
+      left++;
+    } while (array[left] < pivot);
+    do {
+      right--;
+    } while (array[right] > pivot);
+
+    if (left >= right) {
+      break;
+    }
+    Swap(array, left, right);
+  }
+  quick_sort(array, lo, right);
+  quick_sort(array, right + 1, hi);
+}
 
 long* run() {
   init_allocator();
@@ -28,8 +45,7 @@ long* run() {
     p = get_random_array(num_entries);
   }
 
-  // Run the algorithm
-  your_sort(num_entries, p);
+  quick_sort(p, 0, num_entries - 1);
 
   if (is_printing) {
     print_array(num_entries, p);
