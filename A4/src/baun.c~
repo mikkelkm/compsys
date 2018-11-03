@@ -1,0 +1,6 @@
+Int main() {
+  int *s[2];
+  s[0] = 9;
+  s[1] = s[0];
+  return s[1]+s[0];
+  

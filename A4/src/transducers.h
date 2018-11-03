@@ -30,7 +30,7 @@
    functions will return and accept pointers to 'stream'. */
 typedef struct stream stream;
 
-/* Steams must eventually be freed.  This function may only be called
+/* Streams must eventually be freed.  This function may only be called
    once the network sink has stopped. */
 void transducers_free_stream(stream *s);
 

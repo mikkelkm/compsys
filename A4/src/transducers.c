@@ -5,31 +5,34 @@ struct stream {
 };
 
 void transducers_free_stream(stream *s) {
-  s=s; /* unused */
+    free(s);
 }
 
 
 
 int transducers_link_source(stream **out,
                             transducers_source s, const void *arg) {
-  out=out; /* unused */
-  s=s; /* unused */
-  arg=arg; /* unused */
-  return 1;
+    // put arguments in out stream
+    s(arg,&out);
+    
+    // return i 0, not 1, so assert in test0.c works
+    return 0;
 }
 
 int transducers_link_sink(transducers_sink s, void *arg,
                           stream *in) {
-  s=s; /* unused */
-  arg=arg; /* unused */
-  in=in; /* unused */
-  return 1;
+    s(arg,in);
+    
+    return 0;
 }
 
 int transducers_link_1(stream **out,
                        transducers_1 t, const void *arg,
                        stream* in) {
-  out=out; /* unused */
+
+
+
+    out=out; /* unused */
   t=t; /* unused */
   arg=arg; /* unused */
   in=in; /* unused */

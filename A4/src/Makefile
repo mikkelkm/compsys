@@ -1,7 +1,6 @@
 TESTS=test0 test1
 EXAMPLES=divisible
 
-# CC=/Users/baunbaun/Documents/computersystemer_BAUN/compSys-e2018-pub/tools/gcc-online.py
 CC=gcc
 CFLAGS=-g -Wall -Wextra -pedantic -std=gnu99
 
