@@ -2,6 +2,7 @@
 
 struct stream {
   int dummy; /* replace with implementation. */
+  FILE* f; //Skal indeholde en fil
 };
 
 void transducers_free_stream(stream *s) {
@@ -13,8 +14,12 @@ void transducers_free_stream(stream *s) {
 int transducers_link_source(stream **out,
                             transducers_source s, const void *arg) {
     // put arguments in out stream
+    if (fork()==0)
+                        //child
+    else
+                        //Parent
     s(arg,&out);
-    
+    (*s) -> f //"referer pointer til en pointer"
     // return i 0, not 1, so assert in test0.c works
     return 0;
 }
@@ -22,7 +27,7 @@ int transducers_link_source(stream **out,
 int transducers_link_sink(transducers_sink s, void *arg,
                           stream *in) {
     s(arg,in);
-    
+
     return 0;
 }
 
