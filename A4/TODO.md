@@ -3,18 +3,19 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 
-**Task 1: Implementing the API (25%)**
-- [ ] ?
-- [ ] ?
-- [ ] ?
-- [ ] ?
+**Task 1: Implementing the API (25%) NIKLAS**
+- [ ] struct stream
+- [ ] free_stream
+- [ ] link_source
+- [ ] link_1
+- [ ] link_2
+- [ ] dup
 
-
-**Task 2: Write Test Programs (25%)**
-- [ ] test
-- [ ] test
-- [ ] test
-- [ ] test
+**Task 2: Write Test Programs (25%) MADS **
+- [ ] test0
+- [ ] test1
+- [ ] divisible
+- [ ] test resten
 
 **Task 3: Small Report**
 - [ ] Start rapport
@@ -24,10 +25,10 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 **Task 4: Virtual Memory (20%) BAUN**
-- [ ] sp. 1
-- [ ] sp. 2
+- [x] sp. 1
+- [x] sp. 2
 - [ ] sp. 3
-- [ ] sp. 4
+- [x] sp. 4
 
 
 
