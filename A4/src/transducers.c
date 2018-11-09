@@ -70,16 +70,30 @@ if (in -> flag == 0) {
 int transducers_link_1(stream **out,
                        transducers_1 t, const void *arg,
                        stream* in) {
+  if (in -> flag == 0) {
+    FILE* pipe_ports[2];
+    assert(file_pipe(pipe_ports)==0);
+    pid_t ret = fork();
 
+  if (ret == 0) {
+      in -> flag = 1;
+      assert(fclose(pipe_ports[0])==0);
+      t(arg, pipe_ports[1], in -> file);
+      exit(0);
+  }
+  else {
+    assert(fclose(pipe_ports[1])==0);
+    stream * str = malloc(sizeof(stream));
+    str -> file = pipe_ports[0];
+    str -> flag = 0;
+    *out = str ;
+  }
 
-
-  out=out; /* unused */
-  t=t; /* unused */
-  arg=arg; /* unused */
-  in=in; /* unused */
-  return 1;
+    return 0;
+  } else {
+    return 1;
+  }
 }
-
 int transducers_link_2(stream **out,
                        transducers_2 t, const void *arg,
                        stream* in1, stream* in2) {
