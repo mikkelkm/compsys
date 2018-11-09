@@ -40,6 +40,7 @@ int main() {
      *not* ones created by malloc(). */
   for (int i = 0; i < (int)(sizeof(s)/sizeof(s[0])); i++) {
     transducers_free_stream(s[i]);
+
   }
 
   return 0;
