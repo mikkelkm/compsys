@@ -99,6 +99,7 @@ int transducers_link_1(stream **out,
             in -> flag = 1;
             assert(fclose(files[0])==0);
             t(arg, files[1], in -> file);
+            exit(0);
         }
         else {
             assert(fclose(files[1])==0);
