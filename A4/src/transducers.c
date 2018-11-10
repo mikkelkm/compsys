@@ -8,10 +8,6 @@ struct stream {
   int flag;
 };
 
-void transducers_free_stream(stream *s){
-  free(s);
-}
-
 // hint from assigment
 static int file_pipe(FILE* files[2]) {
     int fds[2];
@@ -33,23 +29,33 @@ static int file_pipe(FILE* files[2]) {
 }
 
 
+
+
+
+void transducers_free_stream(stream *s){
+  fclose(s->file);
+  free(s);
+}
+
+
+
 int transducers_link_source(stream **out,
                             transducers_source s,
                             const void *arg) {
 
-    FILE* pipe_ports[2];
-    assert(file_pipe(pipe_ports)==0);
+    FILE* files[2];
+    assert(file_pipe(files)==0);
     pid_t ret = fork();
 
     if (ret == 0) {
-        assert(fclose(pipe_ports[0])==0);
-        s(arg, pipe_ports[1]);
+        assert(fclose(files[0])==0);
+        s(arg, files[1]);
         return 0;
     }
     else {
-        assert(fclose(pipe_ports[1])==0);
+        assert(fclose(files[1])==0);
         stream * str = malloc(sizeof(stream));
-        str -> file = pipe_ports[0];
+        str -> file = files[0];
         str -> flag = 0;
         *out = str ;
         return 0;
@@ -76,19 +82,19 @@ int transducers_link_1(stream **out,
                        stream* in) {
 
     if (in -> flag == 0) {
-        FILE* pipe_ports[2];
-        assert(file_pipe(pipe_ports)==0);
+        FILE* files[2];
+        assert(file_pipe(files)==0);
         pid_t ret = fork();
 
         if (ret == 0) {
             in -> flag = 1;
-            assert(fclose(pipe_ports[0])==0);
-            t(arg, pipe_ports[1], in -> file);
+            assert(fclose(files[0])==0);
+            t(arg, files[1], in -> file);
         }
         else {
-            assert(fclose(pipe_ports[1])==0);
+            assert(fclose(files[1])==0);
             stream * str = malloc(sizeof(stream));
-            str -> file = pipe_ports[0];
+            str -> file = files[0];
             str -> flag = 0;
             *out = str ;
         }
@@ -133,6 +139,7 @@ int transducers_dup(stream **out1,
                     stream **out2,
                     stream *in) {
 
+<<<<<<< HEAD
   if (in -> flag == 0){
     FILE* pipe_ports1[2];
     assert(file_pipe(pipe_ports1) == 0);
@@ -143,4 +150,10 @@ int transducers_dup(stream **out1,
 
 
   return 1;
+=======
+    out1=out1; /* unused */
+    out2=out2; /* unused */
+    in=in; /* unused */
+    return 1;
+>>>>>>> 48e290000e369e825a2ff9f95549684579bfa26d
 }
