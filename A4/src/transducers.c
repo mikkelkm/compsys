@@ -139,7 +139,6 @@ int transducers_dup(stream **out1,
                     stream **out2,
                     stream *in) {
 
-<<<<<<< HEAD
   if (in -> flag == 0){
     FILE* pipe_ports1[2];
     assert(file_pipe(pipe_ports1) == 0);
@@ -147,13 +146,6 @@ int transducers_dup(stream **out1,
     assert(file_pipe(pipe_ports2) == 0);
     pid_t ret = fork();
   }
-
-
   return 1;
-=======
-    out1=out1; /* unused */
-    out2=out2; /* unused */
-    in=in; /* unused */
-    return 1;
->>>>>>> 48e290000e369e825a2ff9f95549684579bfa26d
+
 }
