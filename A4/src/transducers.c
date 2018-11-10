@@ -55,10 +55,10 @@ int transducers_link_source(stream **out,
         assert(fclose(files[0])==0);
             //put arg in pipe out file
         s(arg, files[1]);
-        return 0;
+        exit(0);
     }
     else {
-            // close pipe out file  
+            // close pipe out file
         assert(fclose(files[1])==0);
             // allocate mem for a stream
         stream * str = malloc(sizeof(stream));
