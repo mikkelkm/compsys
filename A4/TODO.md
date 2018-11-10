@@ -4,17 +4,18 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 
 
 **Task 1: Implementing the API (25%) NIKLAS**
-- [ ] struct stream
-- [ ] free_stream
-- [ ] link_source
-- [ ] link_1
+- [x] struct stream
+- [x] free_stream
+- [x] link_source
+- [x] link_1
 - [ ] link_2
 - [ ] dup
 
-**Task 2: Write Test Programs (25%) MADS **
+**Task 2: Write Test Programs (25%) MADS**
 - [ ] test0
 - [ ] test1
 - [ ] divisible
+- [ ] negative test
 - [ ] test resten
 
 **Task 3: Small Report**
@@ -29,14 +30,3 @@ HUSK REFERENCER, NÅR DER TAGES KODE FRA WWW. OGSÅ DIG CHR!
 - [x] sp. 2
 - [ ] sp. 3
 - [x] sp. 4
-
-
-
-
-
-
-
-
-
-
-
