@@ -1,4 +1,4 @@
-TESTS=test0
+TESTS=test0 test1
 EXAMPLES=divisible
 
 CC=gcc
