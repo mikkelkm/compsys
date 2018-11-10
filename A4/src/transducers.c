@@ -43,18 +43,26 @@ int transducers_link_source(stream **out,
                             transducers_source s,
                             const void *arg) {
 
+        // file in and out
     FILE* files[2];
+        // open files and set to read only and write only
     assert(file_pipe(files)==0);
     pid_t ret = fork();
 
+        //child process
     if (ret == 0) {
+            //close pipe file in
         assert(fclose(files[0])==0);
+            //put arg in pipe out file
         s(arg, files[1]);
         return 0;
     }
     else {
+            // close pipe out file  
         assert(fclose(files[1])==0);
+            // allocate mem for a stream
         stream * str = malloc(sizeof(stream));
+            // initiate values in struct
         str -> file = files[0];
         str -> flag = 0;
         *out = str ;
@@ -68,6 +76,7 @@ int transducers_link_sink(transducers_sink s,
                           void *arg,
                           stream *in) {
 
+        // does the stream have a reader?
     if (in -> flag == 0) {
         in -> flag = 1;
         s(arg, in -> file);
