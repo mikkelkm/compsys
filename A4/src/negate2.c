@@ -31,27 +31,26 @@ void save_stream(void *arg, FILE *in) {
   }
 }
 
+
 int main() {
-  stream* s[2];
+  stream* s[3];
 
   char *input = "Hello, World!";
   char *output = malloc(strlen(input)+1);
-  output[strlen(input)] = '\0'; /* Ensure terminating NULL. */
-  int inc = 1;
+  output[0] = '\0';
+  /* Ensure terminating NULL. */
 
+  int inc = 1;
   assert(transducers_link_source(&s[0], string_stream, input) == 0);
   assert(transducers_link_1(&s[1], increment_stream, &inc, s[0]) == 0);
-
-  // we try to use the used stream,
-  assert(transducers_link_1(&s[2], increment_stream, &inc, s[0]) == 1);
-
-  assert(transducers_link_sink(save_stream, output, s[1]) == 0);
+  assert(transducers_link_1(&s[2], increment_stream, &inc, s[1]) == 0);
+  assert(transducers_link_sink(save_stream, output, s[1]) == 1);
 
   /* We cannot use the '==' operator for comparing strings, as strings
      in C are just pointers.  Using '==' would compare the _addresses_
      of the two strings, which is not what we want. */
-  assert(strcmp("Ifmmp-!Xpsme\"",output) == 0);
 
+  assert(strcmp("",output) == 0);
   /* Note the sizeof()-trick to determine the number of elements in
      the array.  This *only* works for statically allocated arrays,
      *not* ones created by malloc(). */
