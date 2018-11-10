@@ -47,10 +47,10 @@ int transducers_link_source(stream **out,
     FILE* files[2];
         // open files and set to read only and write only
     assert(file_pipe(files)==0);
-    pid_t ret = fork();
+    pid_t p = fork();
 
         //child process
-    if (ret == 0) {
+    if (p == 0) {
             //close pipe file in
         assert(fclose(files[0])==0);
             //put arg in pipe out file
@@ -93,9 +93,9 @@ int transducers_link_1(stream **out,
     if (in -> flag == 0) {
         FILE* files[2];
         assert(file_pipe(files)==0);
-        pid_t ret = fork();
+        pid_t p = fork();
 
-        if (ret == 0) {
+        if (p == 0) {
             in -> flag = 1;
             assert(fclose(files[0])==0);
             t(arg, files[1], in -> file);
@@ -121,9 +121,9 @@ int transducers_link_2(stream **out,
     if (in1 -> flag == 0) {
       FILE* pipe_ports[3];
       assert(file_pipe(pipe_ports)==0);
-      pid_t ret = fork();
+      pid_t p = fork();
 
-      if (ret == 0) {
+      if (p == 0) {
         in1 -> flag = 1;
         in2 -> flag = 1;
         assert(fclose(pipe_ports[0])==0);
@@ -148,12 +148,37 @@ int transducers_dup(stream **out1,
                     stream **out2,
                     stream *in) {
 
+
   if (in -> flag == 0){
-    FILE* pipe_ports1[2];
-    assert(file_pipe(pipe_ports1) == 0);
-    FILE* pipe_ports2[2];
-    assert(file_pipe(pipe_ports2) == 0);
-    pid_t ret = fork();
+    FILE* files1[2];
+    assert(file_pipe(files1) == 0);
+    FILE* files2[2];
+    assert(file_pipe(files2) == 0);
+    pid_t p = fork();
+
+    assert(p >= 0);
+
+if (p == 0) {
+
+  char c;
+  while (fread(&c, sizeof(char), 1, in -> file) == 1 )
+  {
+    fwrite(&c, sizeof(char), 1, files1[1]);
+    fwrite(&c, sizeof(char), 1, files2[1]);
+  }
+  exit(0);
+}
+
+
+assert(fclose(files1[1])==0);
+assert(fclose(files2[1])==0);
+stream * str1 = malloc(sizeof(stream));
+stream * str2 = malloc(sizeof(stream));
+str1 -> file = files1[0];
+str2 -> file = files2[0];
+*out1 = str1 ;
+*out2 = str2 ;
+return 0;
   }
   return 1;
 
