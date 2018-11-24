@@ -27,7 +27,7 @@ int main() {
   output[strlen(input)] = '\0'; /* Ensure terminating NULL. */
 
   assert(transducers_link_source(&s[0], string_stream, input) == 0);
-
+  
   assert(transducers_link_sink(save_stream, output, s[0]) == 0);
 
   /* We cannot use the '==' operator for comparing strings, as strings
@@ -38,11 +38,9 @@ int main() {
   /* Note the sizeof()-trick to determine the number of elements in
      the array.  This *only* works for statically allocated arrays,
      *not* ones created by malloc(). */
-  /*'for (int i = 0; i < (int)(sizeof(s)/sizeof(s[0])); i++) {
+  for (int i = 0; i < (int)(sizeof(s)/sizeof(s[0])); i++) {
     transducers_free_stream(s[i]);
-
   }
-  transducers_free_stream(s[1]);
-  */
+
   return 0;
 }
