@@ -54,7 +54,7 @@ void fib_line(const char *line) {
 void* worker(void *arg) {
   struct job_queue *jq = arg;
 
-  printf("job_queue struct created \n");
+  printf(">job_queue struct created \n");
 
   while (1) {
     char *line;
@@ -112,7 +112,7 @@ int main(int argc, char * const *argv) {
   ssize_t line_len;
   size_t buf_len = 0;
   while ((line_len = getline(&line, &buf_len, stdin)) != -1) {
-      printf("Pushing line on queue. Line = %s",(void*)line);
+      printf(">Pushing line on queue. Line = %s",(void*)line);
       job_queue_push(&jq, (void*)strdup(line));
   }
   free(line);

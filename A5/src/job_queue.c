@@ -21,6 +21,7 @@ job_queue->queue = calloc(capacity, sizeof(pthread_t)); //Allocating memory for 
 }
 
 int job_queue_destroy(struct job_queue *job_queue) {
+    printf(">DESTROY called \n");
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs != 0 ){
         pthread_cond_wait(&job_queue->give, &job_queue->mutex);
@@ -31,6 +32,7 @@ int job_queue_destroy(struct job_queue *job_queue) {
 }
 
 int job_queue_push(struct job_queue *job_queue, void *data) {
+    printf(">PUSH called \n");
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs == job_queue->capacity){
         pthread_cond_wait(&job_queue->give, &job_queue->mutex);
@@ -44,6 +46,7 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
 }
 
 int job_queue_pop(struct job_queue *job_queue, void **data) {
+    printf(">POP called \n");
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs == 0){
         pthread_cond_wait(&job_queue->take, &job_queue->mutex);
