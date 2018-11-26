@@ -42,11 +42,13 @@ int fib (int n) {
 // corresponding Fibonacci number, then prints the result to the
 // screen.
 void fib_line(const char *line) {
-  int n = atoi(line);
-  int fibn = fib(n);
-  assert(pthread_mutex_lock(&stdout_mutex) == 0);
-  printf("fib(%d) = %d\n", n, fibn);
-  assert(pthread_mutex_unlock(&stdout_mutex) == 0);
+    printf(">fib_line() called with %s\n", line);
+    int n = atoi(line);
+    printf(">fib_line() called with  %d \n", n);
+    int fibn = fib(n);
+    assert(pthread_mutex_lock(&stdout_mutex) == 0);
+    printf("fib(%d) = %d\n", n, fibn);
+    assert(pthread_mutex_unlock(&stdout_mutex) == 0);
 }
 
 // Each thread will run this function.  The thread argument is a
@@ -57,10 +59,10 @@ void* worker(void *arg) {
   printf(">job_queue struct created \n");
 
   while (1) {
-    char *line;
+    char *line;    
     if (job_queue_pop(jq, (void**)&line) == 0) {
-      fib_line(line);
-      free(line);
+        fib_line(line);
+        free(line);
     } else {
       // If job_queue_pop() returned non-zero, that means the queue is
       // being killed (or some other error occured).  In any case,
@@ -95,7 +97,7 @@ int main(int argc, char * const *argv) {
   struct job_queue jq;
   job_queue_init(&jq, 64); // the queue can hold 64 jobs
 
-  printf(">Job queue created \n");
+  printf(">job queue initialized \n");
 
   // Start up the worker threads.
   pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
@@ -103,7 +105,7 @@ int main(int argc, char * const *argv) {
     if (pthread_create(&threads[i], NULL, &worker, &jq) != 0) {
       err(1, "pthread_create() failed");
     }
-      printf(">Thread %d created \n",i+1);
+      printf(">thread %d created \n",i+1);
 
   }
 
@@ -112,7 +114,7 @@ int main(int argc, char * const *argv) {
   ssize_t line_len;
   size_t buf_len = 0;
   while ((line_len = getline(&line, &buf_len, stdin)) != -1) {
-      printf(">Pushing line on queue. Line = %s",(void*)line);
+      printf(">pushing line on queue. Line = %s",(void*)line);
       job_queue_push(&jq, (void*)strdup(line));
   }
   free(line);
