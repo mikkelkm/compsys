@@ -42,6 +42,9 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
         pthread_cond_wait(&job_queue->give, &job_queue->mutex);
         printf(">PUSH receives GIVE signal \n");
     }
+    job_queue->head = job_queue->head+1;
+    job_queue->queue[job_queue->head % job_queue->capacity] = data;
+    job_queue->jobs = job_queue->jobs+1;
     pthread_cond_signal(&job_queue->take);
     printf(">TAKE signal \n");
     pthread_mutex_unlock(&job_queue->mutex);
@@ -56,6 +59,8 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
         pthread_cond_wait(&job_queue->take, &job_queue->mutex);
         printf(">POP receives TAKE signal \n");
     }
+    *data == job_queue->queue[job_queue->tail  % job_queue->capacity];
+    job_queue->tail = job_queue->tail+1;
     job_queue->jobs = job_queue->jobs-1;
     pthread_cond_signal(&job_queue->give);
     printf(">GIVE signal \n");
