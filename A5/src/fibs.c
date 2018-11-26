@@ -54,6 +54,8 @@ void fib_line(const char *line) {
 void* worker(void *arg) {
   struct job_queue *jq = arg;
 
+  printf("job_queue struct created \n");
+
   while (1) {
     char *line;
     if (job_queue_pop(jq, (void**)&line) == 0) {
@@ -70,6 +72,7 @@ void* worker(void *arg) {
   return NULL;
 }
 
+// arg[0] = fibs, arg[1] =  
 int main(int argc, char * const *argv) {
   int num_threads = 1;
 
@@ -86,10 +89,13 @@ int main(int argc, char * const *argv) {
       err(1, "invalid thread count: %s", argv[2]);
     }
   }
-
+  printf(">num threads: %d \n",num_threads);
+  
   // Create job queue.
   struct job_queue jq;
-  job_queue_init(&jq, 64);
+  job_queue_init(&jq, 64); // the queue can hold 64 jobs
+
+  printf(">Job queue created \n");
 
   // Start up the worker threads.
   pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
@@ -97,15 +103,17 @@ int main(int argc, char * const *argv) {
     if (pthread_create(&threads[i], NULL, &worker, &jq) != 0) {
       err(1, "pthread_create() failed");
     }
-  }
+      printf(">Thread %d created \n",i+1);
 
+  }
 
   // Now read lines from stdin until EOF.
   char *line = NULL;
   ssize_t line_len;
   size_t buf_len = 0;
   while ((line_len = getline(&line, &buf_len, stdin)) != -1) {
-    job_queue_push(&jq, (void*)strdup(line));
+      printf("Pushing line on queue. Line = %s",(void*)line);
+      job_queue_push(&jq, (void*)strdup(line));
   }
   free(line);
 

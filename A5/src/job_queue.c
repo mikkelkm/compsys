@@ -7,6 +7,9 @@
 #include "job_queue.h"
 
 int job_queue_init(struct job_queue *job_queue, int capacity) {
+job_queue->queue = calloc(capacity, sizeof(pthread_t)); //Allocating memory for the buffer
+//job_queue->queue = malloc(capacity*sizeof(pthread_t)); //Allocating memory for the buffer
+
     assert(pthread_mutex_init(&job_queue->mutex, NULL)==0);
     assert(pthread_cond_init(&job_queue->give, NULL)==0);
     assert(pthread_cond_init(&job_queue->take, NULL)==0);
@@ -32,9 +35,9 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
     while(job_queue->jobs == job_queue->capacity){
         pthread_cond_wait(&job_queue->give, &job_queue->mutex);
     }
-    assert(job_queue->head++);    
-    assert(job_queue->queue[job_queue->head] = data);
-    assert(job_queue->jobs++);
+    assert(job_queue->head = job_queue->head+1);
+    assert(job_queue->queue[job_queue->head % job_queue->capacity] = data);
+    assert(job_queue->jobs = job_queue->jobs+1);
     pthread_cond_signal(&job_queue->take);
     pthread_mutex_unlock(&job_queue->mutex);
     return 1;
@@ -45,9 +48,9 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
     while(job_queue->jobs == 0){
         pthread_cond_wait(&job_queue->take, &job_queue->mutex);
     }
-    assert(&data == job_queue->queue[job_queue->head]);
-    assert(job_queue->head--);     
-    assert(job_queue->jobs--);
+    assert(&data == job_queue->queue[job_queue->tail  % job_queue->capacity]);   
+    assert(job_queue->tail = job_queue->tail+1);
+    assert(job_queue->jobs = job_queue->jobs-1);
     pthread_cond_signal(&job_queue->give);
     pthread_mutex_unlock(&job_queue->mutex);
     return 1;
