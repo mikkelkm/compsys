@@ -24,8 +24,11 @@ int job_queue_destroy(struct job_queue *job_queue) {
     printf(">DESTROY called \n");
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs != 0 ){
+        printf(">DESTROY [waiting] \n");
         pthread_cond_wait(&job_queue->give, &job_queue->mutex);
+        printf(">DESTROY receives GIVE signal \n");
     }
+    printf(">DESTROY counts jobs: %d \n", job_queue->jobs);
     free(job_queue); // er det her rigtigt?
     pthread_mutex_unlock(&job_queue->mutex); //er denne nødvendig?
     return 1;
@@ -35,12 +38,15 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
     printf(">PUSH called \n");
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs == job_queue->capacity){
+        printf(">PUSH [waiting] \n");
         pthread_cond_wait(&job_queue->give, &job_queue->mutex);
+        printf(">PUSH receives GIVE signal \n");
     }
     assert(job_queue->head = job_queue->head+1);
     assert(job_queue->queue[job_queue->head % job_queue->capacity] = data);
     assert(job_queue->jobs = job_queue->jobs+1);
     pthread_cond_signal(&job_queue->take);
+    printf(">TAKE signal \n");
     pthread_mutex_unlock(&job_queue->mutex);
     return 1;
 }
@@ -49,12 +55,15 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
     printf(">POP called \n");
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs == 0){
+        printf(">POP [waiting] \n");
         pthread_cond_wait(&job_queue->take, &job_queue->mutex);
+        printf(">POP receives TAKE signal \n");
     }
-    assert(&data == job_queue->queue[job_queue->tail  % job_queue->capacity]);   
+    assert(*data == job_queue->queue[job_queue->tail  % job_queue->capacity]);   
     assert(job_queue->tail = job_queue->tail+1);
     assert(job_queue->jobs = job_queue->jobs-1);
     pthread_cond_signal(&job_queue->give);
+    printf(">GIVE signal \n");
     pthread_mutex_unlock(&job_queue->mutex);
     return 1;
 }
