@@ -29,7 +29,7 @@ int job_queue_destroy(struct job_queue *job_queue) {
         printf(">DESTROY receives GIVE signal \n");
     }
     printf(">DESTROY counts jobs: %d \n", job_queue->jobs);
-    free(job_queue->queue); //free void **?
+    //free(job_queue); //free void **?
     pthread_mutex_unlock(&job_queue->mutex); //er denne nødvendig?
     return 0;
 }
@@ -42,8 +42,6 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
         pthread_cond_wait(&job_queue->give, &job_queue->mutex);
         printf(">PUSH receives GIVE signal \n");
     }
-    printf("job nr %d pushed! \n", job_queue->jobs+1);
-
     job_queue->head = job_queue->head+1;
     job_queue->queue[job_queue->head % job_queue->capacity] = data;
     job_queue->jobs = job_queue->jobs+1;
@@ -61,9 +59,7 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
         pthread_cond_wait(&job_queue->take, &job_queue->mutex);
         printf(">POP receives TAKE signal \n");
     }
-    printf("job nr %d popped! \n", job_queue->jobs);
-    
-    *data = job_queue->queue[job_queue->tail  % job_queue->capacity];
+    *data = job_queue->queue[job_queue->tail % job_queue->capacity];
     job_queue->tail = job_queue->tail+1;
     job_queue->jobs = job_queue->jobs-1;
     pthread_cond_signal(&job_queue->give);
