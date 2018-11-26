@@ -8,3 +8,6 @@
 | Computer network     |    |    |    |    |    |    |  ? |  ? |
 | **% per part**       |INT | 87%| ARK| 50%| OS | 38%| CN | 0% |
 
+Exam qualification is 16 points out of 32 possible.
+We have right now: 14 points
+
