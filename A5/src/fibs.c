@@ -42,10 +42,8 @@ int fib (int n) {
 // corresponding Fibonacci number, then prints the result to the
 // screen.
 void fib_line(const char *line) {
-    printf(">A: fib_line() called with %s\n", line);
     int n = atoi(line);
-    printf(">B: fib_line() called with  %d \n", n);
-    int fibn = fib(n);
+    int fibn = fib(n-1);
     assert(pthread_mutex_lock(&stdout_mutex) == 0);
     printf("fib(%d) = %d\n", n, fibn);
     assert(pthread_mutex_unlock(&stdout_mutex) == 0);
@@ -55,9 +53,6 @@ void fib_line(const char *line) {
 // pointer to a job queue.
 void* worker(void *arg) {
   struct job_queue *jq = arg;
-
-  printf(">job_queue struct created \n");
-
   while (1) {
     char *line;    
     if (job_queue_pop(jq, (void**)&line) == 0) {
@@ -96,8 +91,6 @@ int main(int argc, char * const *argv) {
   // Create job queue.
   struct job_queue jq;
   job_queue_init(&jq, 64); // the queue can hold 64 jobs
-
-  printf(">job queue initialized \n");
 
   // Start up the worker threads.
   pthread_t *threads = calloc(num_threads, sizeof(pthread_t));

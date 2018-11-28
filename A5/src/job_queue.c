@@ -34,7 +34,7 @@ int job_queue_destroy(struct job_queue *job_queue) {
 }
 
 int job_queue_push(struct job_queue *job_queue, void *data) {
-    printf(">PUSH called \n");
+    printf(">PUSH called with %s \n", (char*)data);
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs == job_queue->capacity){
         printf(">PUSH [waiting] \n");
@@ -58,7 +58,7 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
         pthread_cond_wait(&job_queue->take, &job_queue->mutex);
         printf(">POP receives TAKE signal \n");
     }
-    *data = job_queue->queue[job_queue->tail % job_queue->capacity];
+    *data = job_queue->queue[job_queue->tail+1 % job_queue->capacity];
     job_queue->tail = job_queue->tail+1;
     job_queue->jobs = job_queue->jobs-1;
     pthread_cond_signal(&job_queue->give);
