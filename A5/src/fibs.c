@@ -42,9 +42,9 @@ int fib (int n) {
 // corresponding Fibonacci number, then prints the result to the
 // screen.
 void fib_line(const char *line) {
-    printf(">fib_line() called with %s\n", line);
+    printf(">A: fib_line() called with %s\n", line);
     int n = atoi(line);
-    printf(">fib_line() called with  %d \n", n);
+    printf(">B: fib_line() called with  %d \n", n);
     int fibn = fib(n);
     assert(pthread_mutex_lock(&stdout_mutex) == 0);
     printf("fib(%d) = %d\n", n, fibn);
