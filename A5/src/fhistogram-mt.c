@@ -43,15 +43,19 @@ int fhistogram(char const *path) {
         i++;
         update_histogram(local_histogram, c);
         if ((i % 100000) == 0) {
+            pthread_mutex_lock(&stdout_mutex);
             merge_histogram(local_histogram, global_histogram);
             print_histogram(global_histogram);
+            pthread_mutex_unlock(&stdout_mutex);
         }
     }
     
     fclose(f);
     
+    pthread_mutex_lock(&stdout_mutex);
     merge_histogram(local_histogram, global_histogram);
     print_histogram(global_histogram);
+    pthread_mutex_unlock(&stdout_mutex);            
     
     return 0;
 }
@@ -66,16 +70,25 @@ void* worker(void *arg) {
   while (1) {
     char *fpath;    
     if (job_queue_pop(jq, (void**)&fpath) == 0) {
+
+            
+        if(!*fpath){
+            printf("Path is NULL");
+            break;
+        } 
+        
         fhistogram(fpath);
         free(fpath);
+        fpath = NULL;
+        
     } else {
-      // If job_queue_pop() returned non-zero, that means the queue is
-      // being killed (or some other error occured).  In any case,
-      // that means it's time for this thread to die.
-      break;
+            // If job_queue_pop() returned non-zero, that means the queue is
+            // being killed (or some other error occured).  In any case,
+            // that means it's time for this thread to die.
+        break;
     }
   }
-
+  
   return NULL;
 }
 
@@ -141,9 +154,10 @@ int main(int argc, char * const *argv) {
     err(1, "fts_open() failed");
     return -1;
   }
-
+  
   FTSENT *p;
   while ((p = fts_read(ftsp)) != NULL) {
+       
       switch (p->fts_info) {
           case FTS_D:
               break;

@@ -25,7 +25,6 @@ pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 int global_histogram[8] = { 0 };
 
 int fhistogram(char const *path) {
-    printf(">fhistogram on %s \n", (char*)path);
     
     FILE *f = fopen(path, "r");
     
@@ -74,23 +73,23 @@ int main(int argc, char * const *argv) {
     
     FTS *ftsp;
     if ((ftsp = fts_open(paths, fts_options, NULL)) == NULL) {
-    err(1, "fts_open() failed");
-    return -1;
+        err(1, "fts_open() failed");
+        return -1;
     }
     
     FTSENT *p;
     while ((p = fts_read(ftsp)) != NULL) {
         switch (p->fts_info) {
-    case FTS_D:
-        break;
+            case FTS_D:
+                break;
             case FTS_F:
                 fhistogram(p->fts_path);
                 break;
             default:
                 break;
         }
-  }
-
+    }
+    
     fts_close(ftsp);
     
     move_lines(9);

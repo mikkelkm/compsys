@@ -73,7 +73,7 @@ void* worker(void *arg) {
 int main(int argc, char * const *argv) {
   int num_threads = 1;
 
-  if (argc > 3 && strcmp(argv[1], "-n") == 0) {
+  if (argc > 2 && strcmp(argv[1], "-n") == 0) {
     // Since atoi() simply returns zero on syntax errors, we cannot
     // distinguish between the user entering a zero, or some
     // non-numeric garbage.  In fact, we cannot even tell whether the
@@ -91,18 +91,18 @@ int main(int argc, char * const *argv) {
   // Create job queue.
   struct job_queue jq;
   job_queue_init(&jq, 64); // the queue can hold 64 jobs
-
-  // Start up the worker threads.
+  
+      // Start up the worker threads.
   pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
   for (int i = 0; i < num_threads; i++) {
-    if (pthread_create(&threads[i], NULL, &worker, &jq) != 0) {
-      err(1, "pthread_create() failed");
-    }
+      if (pthread_create(&threads[i], NULL, &worker, &jq) != 0) {
+          err(1, "pthread_create() failed");
+      }
       printf(">thread %d created \n",i+1);
-
+      
   }
-
-  // Now read lines from stdin until EOF.
+  
+      // Now read lines from stdin until EOF.
   char *line = NULL;
   ssize_t line_len;
   size_t buf_len = 0;
@@ -111,15 +111,15 @@ int main(int argc, char * const *argv) {
       job_queue_push(&jq, (void*)strdup(line));
   }
   free(line);
-
-  // Destroy the queue.
+  
+      // Destroy the queue.
   job_queue_destroy(&jq);
-
-  // Wait for all threads to finish.  This is important, at some may
-  // still be working on their job.
+  
+      // Wait for all threads to finish.  This is important, at some may
+      // still be working on their job.
   for (int i = 0; i < num_threads; i++) {
-    if (pthread_join(threads[i], NULL) != 0) {
-      err(1, "pthread_join() failed");
-    }
+      if (pthread_join(threads[i], NULL) != 0) {
+          err(1, "pthread_join() failed");
+      }
   }
 }

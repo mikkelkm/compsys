@@ -10,8 +10,8 @@ struct job_queue {
     int jobs;   
     int head;  //this is back in the queue
     int tail;  //this is front of the queue
-    pthread_cond_t give;
-    pthread_cond_t take;
+    int dead;
+    pthread_cond_t cond;
     pthread_mutex_t mutex;
 };
 
