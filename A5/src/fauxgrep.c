@@ -15,6 +15,8 @@
 // very handy.
 #include <err.h>
 
+char const *needle;
+
 int fauxgrep_file(char const *needle, char const *path) {
   FILE *f = fopen(path, "r");
 
@@ -47,7 +49,11 @@ int main(int argc, char * const *argv) {
     exit(1);
   }
 
-  char const *needle = argv[1];
+      //char const *needle = argv[1];
+  needle = argv[1];
+
+      //ned = needle;
+  
   char * const *paths = &argv[2];
 
   // FTS_LOGICAL = follow symbolic links

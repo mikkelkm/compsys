@@ -69,26 +69,18 @@ void* worker(void *arg) {
   struct job_queue *jq = arg;
   while (1) {
     char *fpath;    
-    if (job_queue_pop(jq, (void**)&fpath) == 0) {
-
-            
+    if (job_queue_pop(jq, (void**)&fpath) == 0) {  
         if(!*fpath){
-            printf("Path is NULL");
-            break;
+            break;   // bad path
         } 
-        
-        fhistogram(fpath);
+        fhistogram(fpath);  // DO YOUR THING
         free(fpath);
-        fpath = NULL;
-        
+        fpath = NULL; 
     } else {
-            // If job_queue_pop() returned non-zero, that means the queue is
-            // being killed (or some other error occured).  In any case,
-            // that means it's time for this thread to die.
+        // THREAD DIE
         break;
     }
-  }
-  
+  } 
   return NULL;
 }
 
@@ -122,7 +114,7 @@ int main(int argc, char * const *argv) {
     paths = &argv[1];
   }
 
-//////////////////
+//////////////////=>>
   
     printf(">num threads: %d \n",num_threads);
     // Create job queue.
@@ -153,7 +145,7 @@ int main(int argc, char * const *argv) {
   if ((ftsp = fts_open(paths, fts_options, NULL)) == NULL) {
     err(1, "fts_open() failed");
     return -1;
-  }
+  }  
   
   FTSENT *p;
   while ((p = fts_read(ftsp)) != NULL) {
@@ -163,22 +155,22 @@ int main(int argc, char * const *argv) {
               break;
           case FTS_F:
               
- ////////////////////
+ ////////////////////=>>
 
               //push job to queue 
               job_queue_push(&jq, (void*)strdup(p->fts_path));  
-                                         
+              
 //////////////////////
               
               break;
           default:
               break;
       }
-  }
+  }  
   
   fts_close(ftsp);
 
-/////////////////////////
+/////////////////////////=>>
 
   // Shut down the job queue and the worker threads here.
   
@@ -192,7 +184,6 @@ int main(int argc, char * const *argv) {
           err(1, "pthread_join() failed");
       }
   }
-
   
   
 /////////////////////////

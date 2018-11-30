@@ -22,7 +22,6 @@ int job_queue_init(struct job_queue *job_queue, int capacity) {
 int job_queue_destroy(struct job_queue *job_queue) {
     pthread_mutex_lock(&job_queue->mutex);
     while(job_queue->jobs != 0 ){
-        printf("#jobs = %d \n", job_queue->jobs);
         pthread_cond_wait(&job_queue->cond, &job_queue->mutex);
     }
     printf("destroyed \n");

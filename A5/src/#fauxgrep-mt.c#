@@ -111,8 +111,7 @@ int main(int argc, char * const *argv) {
   }
 
 
-/////////=>>
-  
+/////////=>>  
   
     printf(">num threads: %d \n",num_threads);
     // Create job queue.
@@ -127,11 +126,7 @@ int main(int argc, char * const *argv) {
         }
     }
 
-
 /////////
-
-
-
 
     
   // FTS_LOGICAL = follow symbolic links

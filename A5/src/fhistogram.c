@@ -72,7 +72,7 @@ int main(int argc, char * const *argv) {
     int fts_options = FTS_LOGICAL | FTS_NOCHDIR;
     
     FTS *ftsp;
-    if ((ftsp = fts_open(paths, fts_options, NULL)) == NULL) {
+    if ((ftsp = fts_open(paths, fts_options, NULL)) == NULL) {        
         err(1, "fts_open() failed");
         return -1;
     }
