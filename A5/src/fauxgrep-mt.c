@@ -21,8 +21,6 @@
 
 pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-/////////////////=>>
-
 char const *needle;
 int count = 0;
 
@@ -78,9 +76,6 @@ void* worker(void *arg) {
   return NULL;
 }
 
-///////////////
-
-
 int main(int argc, char * const *argv) {
   if (argc < 2) {
     err(1, "usage: [-n INT] STRING paths...");
@@ -90,7 +85,6 @@ int main(int argc, char * const *argv) {
   int num_threads = 1;
   needle = argv[1];
   char * const *paths = &argv[2];
-
 
   if (argc > 3 && strcmp(argv[1], "-n") == 0) {
     // Since atoi() simply returns zero on syntax errors, we cannot
@@ -104,7 +98,6 @@ int main(int argc, char * const *argv) {
     if (num_threads < 1) {
       err(1, "invalid thread count: %s", argv[2]);
     }
-
     needle = argv[3];
     paths = &argv[4];
 
@@ -112,12 +105,10 @@ int main(int argc, char * const *argv) {
     needle = argv[1];
     paths = &argv[2];
   }
-
-/////////=>>  
   
     // Create job queue.
     struct job_queue jq;
-    job_queue_init(&jq, 256); // the queue can hold 256 jobs
+    job_queue_init(&jq, 64); // the queue can hold 64 jobs
 
     // Start up the worker threads.
     pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
@@ -126,9 +117,6 @@ int main(int argc, char * const *argv) {
             err(1, "pthread_create() failed");
         }
     }
-
-/////////
-
     
   // FTS_LOGICAL = follow symbolic links
   // FTS_NOCHDIR = do not change the working directory of the process
@@ -150,8 +138,6 @@ int main(int argc, char * const *argv) {
           case FTS_D:
               break;
           case FTS_F:
-              
-/////////=>>
               //push job to queue 
               job_queue_push(&jq, (void*)strdup(p->fts_path));  
               
@@ -172,9 +158,6 @@ int main(int argc, char * const *argv) {
       if (pthread_join(threads[i], NULL) != 0) {
           err(1, "pthread_join() failed");
       }
-  }
-
-  /////////
-  
+  }  
   return 0;
 }

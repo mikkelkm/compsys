@@ -15,7 +15,6 @@ struct job_queue {
     pthread_mutex_t mutex;
 };
 
-
 // Initialise a job queue with the given capacity.  The queue starts out
 // empty.  Returns non-zero on error.
 int job_queue_init(struct job_queue *job_queue, int capacity);

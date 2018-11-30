@@ -22,9 +22,6 @@ pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #include "histogram.h"
 
-/////////////////=>>
-
-
 int global_histogram[8] = { 0 };
 
 int fhistogram(char const *path) {
@@ -86,9 +83,6 @@ void* worker(void *arg) {
   return NULL;
 }
 
-///////////////
-
-
 int main(int argc, char * const *argv) {
   if (argc < 2) {
     err(1, "usage: paths...");
@@ -115,12 +109,10 @@ int main(int argc, char * const *argv) {
   } else {
     paths = &argv[1];
   }
-
-//////////////////=>>
   
     // Create job queue.
     struct job_queue jq;
-    job_queue_init(&jq, 256); // the queue can hold 256 jobs
+    job_queue_init(&jq, 64); // the queue can hold 64 jobs
 
     // Start up the worker threads.
     pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
@@ -129,8 +121,6 @@ int main(int argc, char * const *argv) {
             err(1, "pthread_create() failed");
         }
     }
-
-//////////////////
   
   // FTS_LOGICAL = follow symbolic links
   // FTS_NOCHDIR = do not change the working directory of the process
@@ -152,12 +142,8 @@ int main(int argc, char * const *argv) {
           case FTS_D:
               break;
           case FTS_F:
-              
- ////////////////////=>>
-
-              //push job to queue 
-              job_queue_push(&jq, (void*)strdup(p->fts_path));  
-                            
+               //push job to queue 
+              job_queue_push(&jq, (void*)strdup(p->fts_path));                            
               break;
           default:
               break;
@@ -169,17 +155,13 @@ int main(int argc, char * const *argv) {
   // Destroy the queue.
   job_queue_destroy(&jq);
   
-      // Wait for all threads to finish.  This is important, at some may
-      // still be working on their job.
+  // Wait for all threads to finish.  This is important, at some may
+  // still be working on their job.
   for (int i = 0; i < num_threads; i++) {
       if (pthread_join(threads[i], NULL) != 0) {
           err(1, "pthread_join() failed");
       }
-  }
-  
-///////////////////////// 
-  
+  }  
   move_lines(9);
-  
   return 0;
 }
