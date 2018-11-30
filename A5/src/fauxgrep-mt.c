@@ -21,19 +21,21 @@
 
 pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-
 /////////////////=>>
 
 char const *needle;
+int count = 0;
 
 int fauxgrep_file(char const *needle, char const *path) {
   FILE *f = fopen(path, "r");
 
   if (f == NULL) {
-    warn("failed to open %s", path);
-    return -1;
+      pthread_mutex_lock(&stdout_mutex);
+      warn("failed to open %s", path);
+      pthread_mutex_unlock(&stdout_mutex);  
+      return 1;
   }
-
+  
   char *line = NULL;
   size_t linelen = 0;
   int lineno = 1;
@@ -60,10 +62,11 @@ void* worker(void *arg) {
   while (1) {
     char *fpath;    
     if (job_queue_pop(jq, (void**)&fpath) == 0) {
-            
+
         if(!*fpath){
             break;   // bad path
-        } 
+        }
+        
         fauxgrep_file(needle, fpath); // DO YOUR THING
         free(fpath);
         fpath = NULL;        
@@ -110,14 +113,11 @@ int main(int argc, char * const *argv) {
     paths = &argv[2];
   }
 
-
-/////////=>>
+/////////=>>  
   
-  
-    printf(">num threads: %d \n",num_threads);
     // Create job queue.
     struct job_queue jq;
-    job_queue_init(&jq, 64); // the queue can hold 64 jobs
+    job_queue_init(&jq, 256); // the queue can hold 256 jobs
 
     // Start up the worker threads.
     pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
@@ -127,11 +127,7 @@ int main(int argc, char * const *argv) {
         }
     }
 
-
 /////////
-
-
-
 
     
   // FTS_LOGICAL = follow symbolic links
@@ -149,20 +145,24 @@ int main(int argc, char * const *argv) {
 
   FTSENT *p;
   while ((p = fts_read(ftsp)) != NULL) {
-    switch (p->fts_info) {
-    case FTS_D:
-      break;
-    case FTS_F:
-        //push job to queue 
-        job_queue_push(&jq, (void*)strdup(p->fts_path));
-      break;
-    default:
-      break;
-    }
+      
+      switch (p->fts_info) {
+          case FTS_D:
+              break;
+          case FTS_F:
+              
+/////////=>>
+              //push job to queue 
+              job_queue_push(&jq, (void*)strdup(p->fts_path));  
+              
+              break;
+          default:
+              break;
+      }
   }
-
+  
   fts_close(ftsp);
-
+  
   // Destroy the queue.
   job_queue_destroy(&jq);
 
@@ -173,6 +173,8 @@ int main(int argc, char * const *argv) {
           err(1, "pthread_join() failed");
       }
   }
+
+  /////////
   
   return 0;
 }

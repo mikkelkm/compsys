@@ -22,18 +22,23 @@ pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #include "histogram.h"
 
+/////////////////=>>
+
+
 int global_histogram[8] = { 0 };
 
 int fhistogram(char const *path) {
     
     FILE *f = fopen(path, "r");
     
-    int local_histogram[8] = { 0 };
-    
+    int local_histogram[8] = { 0 }; 
+      
     if (f == NULL) {
         fflush(stdout);
+        pthread_mutex_lock(&stdout_mutex);
         warn("failed to open %s", path);
-        return -1;
+        pthread_mutex_unlock(&stdout_mutex);  
+        return 1;
     }
     
     int i = 0;
@@ -60,9 +65,6 @@ int fhistogram(char const *path) {
     return 0;
 }
 
-
-/////////////////
-
 // Each thread will run this function. The thread argument is a
 // pointer to a job queue.
 void* worker(void *arg) {
@@ -72,7 +74,7 @@ void* worker(void *arg) {
     if (job_queue_pop(jq, (void**)&fpath) == 0) {  
         if(!*fpath){
             break;   // bad path
-        } 
+        }
         fhistogram(fpath);  // DO YOUR THING
         free(fpath);
         fpath = NULL; 
@@ -116,10 +118,9 @@ int main(int argc, char * const *argv) {
 
 //////////////////=>>
   
-    printf(">num threads: %d \n",num_threads);
     // Create job queue.
     struct job_queue jq;
-    job_queue_init(&jq, 64); // the queue can hold 64 jobs
+    job_queue_init(&jq, 256); // the queue can hold 256 jobs
 
     // Start up the worker threads.
     pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
@@ -128,9 +129,6 @@ int main(int argc, char * const *argv) {
             err(1, "pthread_create() failed");
         }
     }
-    
-     // Initialise the job queue and some worker threads here.
-
 
 //////////////////
   
@@ -159,9 +157,7 @@ int main(int argc, char * const *argv) {
 
               //push job to queue 
               job_queue_push(&jq, (void*)strdup(p->fts_path));  
-              
-//////////////////////
-              
+                            
               break;
           default:
               break;
@@ -169,10 +165,6 @@ int main(int argc, char * const *argv) {
   }  
   
   fts_close(ftsp);
-
-/////////////////////////=>>
-
-  // Shut down the job queue and the worker threads here.
   
   // Destroy the queue.
   job_queue_destroy(&jq);
@@ -185,9 +177,7 @@ int main(int argc, char * const *argv) {
       }
   }
   
-  
-/////////////////////////
-  
+///////////////////////// 
   
   move_lines(9);
   

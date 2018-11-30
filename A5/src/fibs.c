@@ -86,7 +86,6 @@ int main(int argc, char * const *argv) {
       err(1, "invalid thread count: %s", argv[2]);
     }
   }
-  printf(">num threads: %d \n",num_threads);
   
   // Create job queue.
   struct job_queue jq;
@@ -97,9 +96,7 @@ int main(int argc, char * const *argv) {
   for (int i = 0; i < num_threads; i++) {
       if (pthread_create(&threads[i], NULL, &worker, &jq) != 0) {
           err(1, "pthread_create() failed");
-      }
-      printf(">thread %d created \n",i+1);
-      
+      }      
   }
   
       // Now read lines from stdin until EOF.
@@ -107,7 +104,6 @@ int main(int argc, char * const *argv) {
   ssize_t line_len;
   size_t buf_len = 0;
   while ((line_len = getline(&line, &buf_len, stdin)) != -1) {
-      printf(">pushing line on queue. Line = %s",(void*)line);
       job_queue_push(&jq, (void*)strdup(line));
   }
   free(line);

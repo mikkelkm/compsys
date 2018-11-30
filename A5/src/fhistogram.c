@@ -19,7 +19,7 @@
 #include "histogram.h"
 #include "job_queue.h"
 
-pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 int global_histogram[8] = { 0 };

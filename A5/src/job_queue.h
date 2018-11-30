@@ -8,13 +8,12 @@ struct job_queue {
     void ** queue;
     int capacity;
     int jobs;   
-    int head;  //this is back in the queue
-    int tail;  //this is front of the queue
+    int head;  // back of the queue
+    int tail;  // front of the queue
     int dead;
     pthread_cond_t cond;
     pthread_mutex_t mutex;
 };
-
 
 
 // Initialise a job queue with the given capacity.  The queue starts out
