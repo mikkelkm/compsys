@@ -21,6 +21,7 @@
 
 //pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+int count = 0;
 
 int global_histogram[8] = { 0 };
 
@@ -37,7 +38,7 @@ int fhistogram(char const *path) {
     }
     
     int i = 0;
-    
+    count++;
     char c;
     while (fread(&c, sizeof(c), 1, f) == 1) {
         i++;
@@ -93,6 +94,8 @@ int main(int argc, char * const *argv) {
     fts_close(ftsp);
     
     move_lines(9);
+
+    printf("COUNT files: %d \n", count);
     
     return 0;
 }
