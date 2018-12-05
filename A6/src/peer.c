@@ -1,47 +1,54 @@
 #include <stdio.h>
 #include <assert.h>
 #include "peer.h"
+#include "peer_login.c"
+#include "peer_lookup.c"
+#include "peer_logout.c"
+#include "peer_exit.c"
+#include "peer_input.c"
 
-#define ARGNUM 2 // TODO: Put the number of arguments you want the
-                 // program to take
-                 // CB: Command line arguments are used to provide
-                 // the peer client with the IP address and port of the name server.name of the name server?
+int main() {
 
-char *IP_nameserver = "192.168.1.42";    // IP address of name server
-char *port_nameserver = "3456";          // Port of name server
+    int logged_in = 0; // 1 is yes. 0 is no.
+    size_t bufsize = 64;
+    char *input_buf = (char*)calloc(bufsize, sizeof(char*));    
+    const char delim[3] = "\n ";
+    char *token[5];   
+    
+    printf("PEER CLIENT INITIATED \n");
+    
+    while(1){
 
-
-int main(int argc, char**argv) {
-    
-    if (argc != ARGNUM + 1) {
-        printf("%s expects %d arguments.\n", (argv[0]+2), ARGNUM);
-        return(0);
-    }
-    
-    char *IP = argv[1]; // IP address of name server?
-    char *port = argv[2];     // Port of name server?
-       
-    if(strcmp(IP, IP_nameserver)!=0){
-        printf("Unknown host \n");
-        return 1;
-    }
-    else if(strcmp(port, port_nameserver)!=0){
-        printf("Unknown port \n");
-        return 1;
-    }
-
-    // create connection to nameserver
-    int clientfd = open_clientfd(IP,port);
-    assert(clientfd > 0);
-    
-    
-    printf("/login ");
-    
-    
-// CB:  The syntax for the command is :
-//      /login <nick> <password> <IP> <Port>
-    
-    
-    //TODO: Implement
+        // get standard in
+        getline(&input_buf, &bufsize, stdin);
+        // tokenize
+        token[0] = strtok(input_buf, delim);
+        for(int i = 1;i<5;i++){
+            token[i] = strtok(NULL, delim);
+        }
+            
+        if(strcmp(token[0], "/login") == 0){
+            logged_in = login(token[1],token[2],token[3],token[4]);
+        } else if(strcmp(token[0], "/lookup") == 0){
+            if(logged_in){
+                lookup(token[1]);
+            } else {
+                printf("You are not logged in!\n");
+            }            
+        } else if(strcmp(token[0], "/logout") == 0){
+            if(logged_in){
+                logout();
+            } else {
+                printf("You are not logged in!\n");
+                
+            }
+        } else if(strcmp(token[0], "/exit") == 0){
+            exit(0);
+            
+        } else{  
+            printf("Do not compute! Valid commands: \n/login <user> <password> <IP> <path> \n/lookup <user> \n/logout \n/exit \n");
+        }       
+    } 
     return 0;
 }
+
