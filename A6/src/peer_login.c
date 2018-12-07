@@ -1,12 +1,21 @@
+#include "csapp.h"
 
+int login(char *nick, char *password, char *host, char *port){
 
-int login(char *nick, char *password, char *IP, char *port){
+    char *buf[MAXLINE];
+    rio_t rio;
 
-    printf("logged in at %s %s with %s %s \n",IP,port,nick,password);
+    printf("Trying to login at %s %s with %s %s \n",host,port,nick,password);
+    int clientfd = open_clientfd(host,port);
 
-    int clientfd = open_clientfd(IP,port);
+    Rio_readinitb(&rio, clientfd);
 
-    //assert(clientfd>0);
+    while (Fgets(buf, MAXLINE, stdin) != NULL) {
+	Rio_writen(clientfd, buf, strlen(buf));
+	Rio_readlineb(&rio, buf, MAXLINE);
+	Fputs(buf, stdout);
+    }
+    Close(clientfd);
     
     return 1;
 }
