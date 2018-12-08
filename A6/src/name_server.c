@@ -13,8 +13,6 @@ void echo(int connfd);
 
 int main(int argc, char **argv){
 
-    // init db
-    struct user* db = init_db();
 
     int listenfd, connfd, port, clientlen;
     struct sockaddr_in clientaddr;
@@ -26,14 +24,20 @@ int main(int argc, char **argv){
     }
     //port = atoi(argv[1]);
 
+    // init db
+    db = init_db();
+
     listenfd = Open_listenfd(argv[1]);
+
+    printf("Listen fd is %d\n",listenfd);
+    
     while (1) {
 	clientlen = sizeof(clientaddr);
-	connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen); //line:netp:tiny:accept
+	connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+        printf("Connection fd is %d\n", connfd);
 
-        doit(connfd);                                             //line:netp:tiny:doit
-
-        Close(connfd);                                            //line:netp:tiny:close
+        doit(connfd);                                             
+        Close(connfd);                                            
     }
 }
 

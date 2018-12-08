@@ -1,5 +1,8 @@
 #include "csapp.h" //You can remove this if you do not wish to use the helper functions
 
+// init db
+struct user* db = NULL;
+
 struct user {
     
     char *nick;
@@ -27,6 +30,7 @@ struct user* init_db(){
     return db;
 }
 
+
 void doit(int fd) 
 {
     int is_static;
@@ -39,9 +43,12 @@ void doit(int fd)
     Rio_readinitb(&rio, fd);
     Rio_readlineb(&rio, buf, MAXLINE);                   //line:netp:doit:readrequest
     sscanf(buf, "%s %s %s", method, uri, version);       //line:netp:doit:parserequest
+    sprintf(buf, "Server users are %s %s %s\r\n", db[0].nick, db[1].nick, db[2].nick); 
+    Rio_writen(fd, buf, strlen(buf));
+
     if (strcasecmp(method, "GET")) {                     //line:netp:doit:beginrequesterr
         //clienterror(fd, method, "501", "Not Implemented",      "Tiny does not implement this method");
         return;
     }                                                    //line:netp:doit:endrequesterr
-    read_requesthdrs(&rio);                  
+    //read_requesthdrs(&rio);                  
 }

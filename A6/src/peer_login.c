@@ -8,13 +8,15 @@ int login(char *nick, char *password, char *host, char *port){
     printf("Trying to login at %s %s with %s %s \n",host,port,nick,password);
     int clientfd = open_clientfd(host,port);
 
+    printf("Client fd: %d\n", clientfd);
+
     Rio_readinitb(&rio, clientfd);
 
-    while (Fgets(buf, MAXLINE, stdin) != NULL) {
+    while(getline(&input_buf, &bufsize, stdin) != NULL){
 	Rio_writen(clientfd, buf, strlen(buf));
 	Rio_readlineb(&rio, buf, MAXLINE);
-	Fputs(buf, stdout);
-    }
+        Rio_writen(stdout, buf, MAXLINE);
+    }  
     Close(clientfd);
     
     return 1;
