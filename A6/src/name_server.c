@@ -4,45 +4,58 @@
 void echo(int connfd);
 
 #define ARGNUM 1 // TODO: Put the number of arguments you want the
-                 // program to take
-
-// main fn aquired from http://csapp.cs.cmu.edu/2e/ics2/code/netp/tiny/tiny.c
+// program to take
 
 void echo(int connfd);
+void *thread(void *vargp);
 
+//echo routine
+void echo(int connfd)
+{
+    size_t n;
+    char buf[MAXLINE];
+    rio_t rio;
 
-int main(int argc, char **argv){
-
-
-    int listenfd, connfd, port, clientlen;
-    struct sockaddr_in clientaddr;
-
-    /* Check command line args */
-    if (argc != 2) {
-	fprintf(stderr, "usage: %s <port>\n", argv[0]);
-	exit(1);
-    }
-    //port = atoi(argv[1]);
-
-    // init db
-    db = init_db();
-
-    listenfd = Open_listenfd(argv[1]);
-
-    printf("Listen fd is %d\n",listenfd);
-    
-    while (1) {
-	clientlen = sizeof(clientaddr);
-	connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
-        printf("Connection fd is %d\n", connfd);
-
-        doit(connfd);                                             
-        Close(connfd);                                            
+    Rio_readinitb(&rio, connfd);
+    while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) { //line:netp:echo:eof
+	printf("server received %d bytes\n", (int)n);
+	Rio_writen(connfd, buf, n);
     }
 }
 
+//Thread routine
+void *thread(void *vargp)
+{
+  int connfd = *((int *)vargp);
+  Pthread_detach(pthread_self()); //line:conc:echoservert:detach
+  Free(vargp);                    //line:conc:echoservert:free
+  echo(connfd);
+  Close(connfd);
+  return NULL;
+}
 
+int main(int argc, char **argv)
+{
+  int listenfd, *connfdp;
+  socklen_t clientlen;
+  struct sockaddr_storage clientaddr;
+  pthread_t tid;
+  char client_hostname[MAXLINE], client_port[MAXLINE];
 
+  if (argc != 2) {
+    fprintf(stderr, "usage: %s <port>\n", argv[0]);
+    exit(0);
+  }
+  listenfd = Open_listenfd(argv[1]);
 
-
-
+  while (1) {
+    clientlen=sizeof(struct sockaddr_storage);
+    connfdp = Malloc(sizeof(int)); //line:conc:echoservert:beginmalloc
+    *connfdp = Accept(listenfd, (SA *) &clientaddr, &clientlen); //line:conc:echoservert:endmalloc
+    Pthread_create(&tid, NULL, thread, connfdp);
+    Getnameinfo((SA *) &clientaddr, clientlen, client_hostname, MAXLINE,
+    client_port, MAXLINE, 0);
+    printf("Connected to (%s, %s) via thread %d\n",
+    client_hostname, client_port, (int) tid);
+  }
+}
