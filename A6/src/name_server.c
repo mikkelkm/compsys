@@ -25,8 +25,8 @@ int main(int argc, char **argv)
 
   while (1) {
     clientlen=sizeof(struct sockaddr_storage);
-    connfdp = Malloc(sizeof(int)); //line:conc:echoservert:beginmalloc
-    *connfdp = Accept(listenfd, (SA *) &clientaddr, &clientlen); //line:conc:echoservert:endmalloc
+    connfdp = Malloc(sizeof(int));
+    *connfdp = Accept(listenfd, (SA *) &clientaddr, &clientlen); 
     Pthread_create(&tid, NULL, thread, connfdp);
     Getnameinfo((SA *) &clientaddr, clientlen, client_hostname, MAXLINE,
     client_port, MAXLINE, 0);

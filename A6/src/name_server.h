@@ -9,6 +9,60 @@ struct user {
     char *password;
 };
 
+int interpreter(char *buf){
+  char input[64];
+  char nick[32];
+  char pass[32];
+  char ip[32];
+  char port[32];
+
+  int temp = 0;
+  int t = 0;
+
+  sscanf(handler, "%s", input);
+  if(strcmp (input, "/login\n")==0){
+    //handle login kald
+    return 0;
+  }
+  if(strcmp (input, "/lookup\n")==0){
+    //handle lookup kald
+    return 0;
+  }
+  if(strcmp (input, "/logout\n")==0){
+    //handle logout kald
+    return 0;
+  }
+  if(strcmp (input, "/exit\n")==0){
+    //handle exit kald
+    exit(0);
+  }
+  else{
+    //return en error
+    return 1;
+  }
+}
+
+
+void handler(int connfd){
+  /*Gør noget afhængigt af output fra intepreter
+  Fx:
+  flag = intepreter(input);
+
+  if (flag == 1){
+    *log brugeren ind*
+  }
+  if (flag == 2){
+    *log brugeren ud*
+  }
+  if (flag == -1){
+    *exit program*
+  }
+
+  */
+}
+
+
+
 //echo routine
 void echo(int connfd)
 {
@@ -17,9 +71,9 @@ void echo(int connfd)
     rio_t rio;
 
     Rio_readinitb(&rio, connfd);
-    while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) { //line:netp:echo:eof
-	printf("server received %d bytes\n", (int)n);
-	Rio_writen(connfd, buf, n);
+    while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+	     printf("server received %d bytes\n", (int)n);
+	     Rio_writen(connfd, buf, n);
     }
 }
 
@@ -27,16 +81,14 @@ void echo(int connfd)
 void *thread(void *vargp)
 {
   int connfd = *((int *)vargp);
-  Pthread_detach(pthread_self()); //line:conc:echoservert:detach
-  Free(vargp);                    //line:conc:echoservert:free
+  Pthread_detach(pthread_self()); 
+  Free(vargp);
   echo(connfd);
   Close(connfd);
   return NULL;
 }
 
-
-
-
+/*
 struct user* init_db(){
     struct user* db =  malloc(10 * sizeof(struct user));
 
@@ -58,7 +110,6 @@ struct user* init_db(){
     return db;
 }
 
-
 void doit(int fd)
 {
     int is_static;
@@ -67,7 +118,7 @@ void doit(int fd)
     char filename[MAXLINE], cgiargs[MAXLINE];
     rio_t rio;
 
-    /* Read request line and headers */
+    //Read request line and headers
     Rio_readinitb(&rio, fd);
     Rio_readlineb(&rio, buf, MAXLINE);                   //line:netp:doit:readrequest
     sscanf(buf, "%s %s %s", method, uri, version);       //line:netp:doit:parserequest
@@ -80,3 +131,4 @@ void doit(int fd)
     }                                                    //line:netp:doit:endrequesterr
     //read_requesthdrs(&rio);
 }
+*/
