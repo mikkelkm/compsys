@@ -19,7 +19,7 @@ echoclient : echoclient.c csapp.o
 	$(CC) $(CFLAGS) $< *.o -o $@ $(LD_FLAGS)
 
 clean :
-	rm -rf *.o peer name_server
+	rm -rf *.o peer name_server echoclient
 
 ../src.zip :
 	make clean

@@ -9,71 +9,58 @@ struct user {
     char *password;
 };
 
-int interpreter(char *buf){
-  char input[64];
-  char nick[32];
-  char pass[32];
-  char ip[32];
-  char port[32];
-
-  int temp = 0;
-  int t = 0;
-
-  sscanf(handler, "%s", input);
-  if(strcmp (input, "/login\n")==0){
-    //handle login kald
-    return 0;
-  }
-  if(strcmp (input, "/lookup\n")==0){
-    //handle lookup kald
-    return 0;
-  }
-  if(strcmp (input, "/logout\n")==0){
-    //handle logout kald
-    return 0;
-  }
-  if(strcmp (input, "/exit\n")==0){
-    //handle exit kald
-    exit(0);
-  }
-  else{
-    //return en error
-    return 1;
-  }
-}
-
-
+// handles HTTP requests
 void handler(int connfd){
-  /*Gør noget afhængigt af output fra intepreter
-  Fx:
-  flag = intepreter(input);
-
-  if (flag == 1){
-    *log brugeren ind*
-  }
-  if (flag == 2){
-    *log brugeren ud*
-  }
-  if (flag == -1){
-    *exit program*
-  }
-
-  */
-}
-
-
-
-//echo routine
-void echo(int connfd)
-{
+    
     size_t n;
     char buf[MAXLINE];
+    char tok_buf[MAXLINE];
     rio_t rio;
-
+    int flag = 0;
+    char request[32];
+    const char delim[3] = "\n ";
+    char *token[5];   
+    
     Rio_readinitb(&rio, connfd);
+
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
-	     printf("server received %d bytes\n", (int)n);
-	     Rio_writen(connfd, buf, n);
+        printf("server received %d bytes\n", (int)n);
+        
+        strcpy(tok_buf,buf);
+
+        // tokenize
+        token[0] = strtok(tok_buf, delim);
+        for(int i = 1;i<5;i++){
+            token[i] = strtok(NULL, delim);
+        }
+
+        strcpy(request,token[0]);
+        
+        printf("REQUEST received is %s\n", request);
+
+        // ECHO
+        Rio_writen(connfd, buf, n);
+
+        if(strcmp (request, "/login")==0){
+            printf("LOGGIN IN\n");
+            //handle login kald
+        }
+        if(strcmp (request, "/lookup")==0){
+            printf("LOOKING UP\n");  
+            //handle lookup kald
+        }
+        if(strcmp (request, "/logout")==0){
+            printf("LOGGIN OUT\n");  
+            //handle logout kald
+        }
+        if(strcmp (request, "/exit")==0){
+            printf("EXITTING NOW\n");  
+            //handle exit kald
+            exit(0);
+        }
+        else{
+            //return en error
+        }
     }
 }
 
@@ -83,9 +70,76 @@ void *thread(void *vargp)
   int connfd = *((int *)vargp);
   Pthread_detach(pthread_self()); 
   Free(vargp);
-  echo(connfd);
+  
+  //echo(connfd);
+  handler(connfd);
+  
   Close(connfd);
   return NULL;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+int interpreter(char *buf){
+    char request[64];
+    char nick[32];
+    char pass[32];
+    char ip[32];
+    char port[32];
+    
+    int temp = 0;
+    int t = 0;
+    
+    sscanf(buf, "%s", request);
+    
+    if(strcmp (request, "/login\n")==0){
+        printf("SERVER receives /login request");  
+        //handle login kald
+        return 1;
+    }
+    if(strcmp (request, "/lookup\n")==0){
+        //handle lookup kald
+        return 2;
+    }
+    if(strcmp (request, "/logout\n")==0){
+        //handle logout kald
+        return 3;
+    }
+    if(strcmp (request, "/exit\n")==0){
+        //handle exit kald
+        exit(0);
+    }
+    else{
+        //return en error
+        return 0;
+    }
+    
+    return 0;    
+}
+
+
+//echo routine
+void echo(int connfd)
+{
+    size_t n;
+    char buf[MAXLINE];
+    rio_t rio;
+    
+    Rio_readinitb(&rio, connfd);
+    while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+	     printf("server received %d bytes\n", (int)n);
+             
+	     Rio_writen(connfd, buf, n);
+    }
 }
 
 /*

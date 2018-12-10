@@ -5,7 +5,7 @@ int login(char *nick, char *password, char *host, char *port){
     char *buf[MAXLINE];
     rio_t rio;
 
-    printf("Trying to login at %s %s with %s %s \n",host,port,nick,password);
+    printf("/login called \n");
     int clientfd = open_clientfd(host,port);
 
     printf("Client fd: %d\n", clientfd);
