@@ -4,8 +4,6 @@
 #define ARGNUM 1 // TODO: Put the number of arguments you want the
 // program to take
 
-//void *thread(void *vargp);
-
 int main(int argc, char **argv){
     
     int listenfd, *connfdp;

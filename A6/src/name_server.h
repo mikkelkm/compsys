@@ -1,6 +1,8 @@
 #include "csapp.h" //You can remove this if you do not wish to use the helper functions
 
-void lookup(int fd, char* nick, size_t n);
+#define err1 "You are not logged in!\n"
+
+void lookup(int fd, char* nick);
 struct user* init_db();
 struct user* db = NULL;
 
@@ -43,8 +45,6 @@ void handler(int connfd){
         strcpy(request,token[0]);
 
         printf("REQUEST received is %s\n", request);
-        // ECHO
-        Rio_writen(connfd, buf, n);
 
         if(strcmp (request, "/login")==0){
             printf("LOGGIN IN\n");
@@ -68,11 +68,11 @@ void handler(int connfd){
         if(strcmp (request, "/lookup")==0){
             printf("LOOKING UP\n");
             if(flag==1){
-                lookup(connfd, token[1], n);
+                lookup(connfd, token[1]);
             }
             else {
-                Rio_writen(connfd, "You are not logged in!", n);
-            }
+                Rio_writen(connfd, err1, strlen(err1));   
+            }    
         }
         if(strcmp (request, "/logout")==0){
             printf("LOGGIN OUT\n");
@@ -127,16 +127,29 @@ struct user* init_db(){
     return db;
 }
 
-void lookup(int fd, char* nick, size_t n){
+void lookup(int fd, char* nick){
     if(nick){
-        Rio_writen(fd, nick, n);
+        Rio_writen(fd, nick, strlen(nick));   
     }
     else{
-            Rio_writen(fd, db[0].nick, n);
-            Rio_writen(fd, db[1].nick, n);
-            Rio_writen(fd, db[2].nick, n);
-    }
+        char out[50];
+        for(int i = 0;i<3;i++){
+            strcat(out,db[i].nick);
+            strcat(out, "\n");
+        }
+        Rio_writen(fd, out, strlen(out));  
+    }        
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
