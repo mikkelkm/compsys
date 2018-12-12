@@ -1,6 +1,10 @@
 #include "csapp.h" //You can remove this if you do not wish to use the helper functions
 
-#define err1 "You are not logged in!\n"
+#define msg_not_in "You are not logged in!\n"
+#define err2 "Login failed; wrong username or password. Please try again\n"
+#define err3 "send login shit tilbage\n"
+#define msg_logout "You are logged out\n"
+
 
 void lookup(int fd, char* nick);
 struct user* init_db();
@@ -41,6 +45,7 @@ void handler(int connfd){
         for(int i = 1;i<5;i++){
             token[i] = strtok(NULL, delim);
         }
+        printf("TOKENS 0-4 ARE: %s %s %s %s %s\n", token[0], token[1], token[2], token[3], token[4]);
 
         strcpy(request,token[0]);
 
@@ -50,35 +55,41 @@ void handler(int connfd){
             printf("LOGGIN IN\n");
             sscanf(buf, "/login %s %s %s %s\n", nick,pass,ip,port);
             printf("Login attempted with: %s\n", nick);
+
             for(int i=0; i < 3; i++){
               if ((strcmp(db[i].nick, nick)) == 0 && (strcmp(db[i].password, pass) == 0)){
                  printf("%s has logged in\n", db[i].nick);
                  flag = 1;
+                 Rio_writen(connfd, "Welcome\n", 8);
+
                  break;
               }
               else{
                 flag = 0;
               }
             }
+            
             if(flag != 1){
-              printf("Failed a login attempt\n");
-              Rio_writen(connfd, "Login failed; wrong username or password. Please try again\n", n);
+                Rio_writen(connfd, err2, strlen(err2));
+                printf("Failed a login attempt\n");
             }
+            
         }
-        if(strcmp (request, "/lookup")==0){
+        else if(strcmp (request, "/lookup")==0){
             printf("LOOKING UP\n");
             if(flag==1){
-                lookup(connfd, token[1]);
+                lookup(connfd, nick);
             }
             else {
-                Rio_writen(connfd, err1, strlen(err1));   
-            }    
+                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));   
+            } 
         }
-        if(strcmp (request, "/logout")==0){
-            printf("LOGGIN OUT\n");
-            //handle logout kald
+        else if(strcmp (request, "/logout")==0){
+            printf("LOGGING OUT\n");
+            flag = 0;
+            Rio_writen(connfd, msg_logout, strlen(msg_logout));   
         }
-        if(strcmp (request, "/exit")==0){
+        else if(strcmp (request, "/exit")==0){
             printf("EXITTING NOW\n");
             //handle exit kald
             exit(0);
@@ -138,7 +149,7 @@ void lookup(int fd, char* nick){
             strcat(out, "\n");
         }
         Rio_writen(fd, out, strlen(out));  
-    }        
+    }       
 }
 
 
