@@ -13,7 +13,7 @@ struct user {
 
 // handles HTTP requests
 void handler(int connfd){
-    
+
     size_t n;
     char buf[MAXLINE];
     char tok_buf[MAXLINE];
@@ -21,32 +21,49 @@ void handler(int connfd){
     int flag = 0;
     char request[32];
     const char delim[3] = "\n ";
-    char *token[5];   
-    
+    char *token[5];
+    char nick[32];
+    char pass[32];
+    char ip[32];
+    char port[32];
+
     Rio_readinitb(&rio, connfd);
 
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
         printf("server received %d bytes\n", (int)n);
-        
+
         strcpy(tok_buf,buf);
 
         // tokenize
         token[0] = strtok(tok_buf, delim);
         for(int i = 1;i<5;i++){
-            token[i] = strtok(NULL, delim); 
+            token[i] = strtok(NULL, delim);
         }
 
         strcpy(request,token[0]);
-        
-        printf("REQUEST received is %s\n", request);
 
+        printf("REQUEST received is %s\n", request);
         // ECHO
         Rio_writen(connfd, buf, n);
 
         if(strcmp (request, "/login")==0){
-            printf("LOGGING IN\n");
-            
-            //handle login kald
+            printf("LOGGIN IN\n");
+            sscanf(buf, "/login %s %s %s %s\n", nick,pass,ip,port);
+            printf("Login attempted with: %s\n", nick);
+            for(int i=0; i < 3; i++){
+              if ((strcmp(db[i].nick, nick)) == 0 && (strcmp(db[i].password, pass) == 0)){
+                 printf("%s has logged in\n", db[i].nick);
+                 flag = 1;
+                 break;
+              }
+              else{
+                flag = 0;
+              }
+            }
+            if(flag != 1){
+              printf("Failed a login attempt\n");
+              Rio_writen(connfd, "Login failed; wrong username or password. Please try again\n", n);
+            }
         }
         if(strcmp (request, "/lookup")==0){
             printf("LOOKING UP\n");
@@ -54,15 +71,15 @@ void handler(int connfd){
                 lookup(connfd, token[1], n);
             }
             else {
-                Rio_writen(connfd, "You are not logged in!", n);   
-            }    
+                Rio_writen(connfd, "You are not logged in!", n);
+            }
         }
         if(strcmp (request, "/logout")==0){
-            printf("LOGGIN OUT\n");  
+            printf("LOGGIN OUT\n");
             //handle logout kald
         }
         if(strcmp (request, "/exit")==0){
-            printf("EXITTING NOW\n");  
+            printf("EXITTING NOW\n");
             //handle exit kald
             exit(0);
         }
@@ -74,16 +91,16 @@ void handler(int connfd){
 
 //Thread routine
 void *thread(void *vargp){
-    
+
   int connfd = *((int *)vargp);
-  Pthread_detach(pthread_self()); 
+  Pthread_detach(pthread_self());
   Free(vargp);
   // init db
   db = init_db();
 
   //echo(connfd);
   handler(connfd);
-  
+
   Close(connfd);
   return NULL;
 }
@@ -112,12 +129,12 @@ struct user* init_db(){
 
 void lookup(int fd, char* nick, size_t n){
     if(nick){
-        Rio_writen(fd, nick, n);   
+        Rio_writen(fd, nick, n);
     }
     else{
-            Rio_writen(fd, db[0].nick, n);   
-            Rio_writen(fd, db[1].nick, n);   
-            Rio_writen(fd, db[2].nick, n);   
+            Rio_writen(fd, db[0].nick, n);
+            Rio_writen(fd, db[1].nick, n);
+            Rio_writen(fd, db[2].nick, n);
     }
 }
 
@@ -127,7 +144,7 @@ void lookup(int fd, char* nick, size_t n){
 
 
 
-
+/*
 
 int interpreter(char *buf){
     char request[64];
@@ -135,14 +152,14 @@ int interpreter(char *buf){
     char pass[32];
     char ip[32];
     char port[32];
-    
+
     int temp = 0;
     int t = 0;
-    
+
     sscanf(buf, "%s", request);
-    
+
     if(strcmp (request, "/login\n")==0){
-        printf("SERVER receives /login request");  
+        printf("SERVER receives /login request");
         //handle login kald
         return 1;
     }
@@ -162,22 +179,22 @@ int interpreter(char *buf){
         //return en error
         return 0;
     }
-    
-    return 0;    
+
+    return 0;
 }
 
-
+*/
 //echo routine
 void echo(int connfd)
 {
     size_t n;
     char buf[MAXLINE];
     rio_t rio;
-    
+
     Rio_readinitb(&rio, connfd);
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
 	     printf("server received %d bytes\n", (int)n);
-             
+
 	     Rio_writen(connfd, buf, n);
     }
 }
