@@ -4,8 +4,7 @@
 #define ARGNUM 1 // TODO: Put the number of arguments you want the
 // program to take
 
-void echo(int connfd);
-void *thread(void *vargp);
+//void *thread(void *vargp);
 
 int main(int argc, char **argv){
     
@@ -14,6 +13,7 @@ int main(int argc, char **argv){
     struct sockaddr_storage clientaddr;
     pthread_t tid;
     char client_hostname[MAXLINE], client_port[MAXLINE];
+
     
     if (argc != 2) {
         fprintf(stderr, "usage: %s <port>\n", argv[0]);

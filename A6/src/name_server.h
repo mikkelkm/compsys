@@ -1,7 +1,9 @@
 #include "csapp.h" //You can remove this if you do not wish to use the helper functions
 
-// init db
+void lookup(int fd, char* nick, size_t n);
+struct user* init_db();
 struct user* db = NULL;
+
 
 struct user {
 
@@ -31,7 +33,7 @@ void handler(int connfd){
         // tokenize
         token[0] = strtok(tok_buf, delim);
         for(int i = 1;i<5;i++){
-            token[i] = strtok(NULL, delim);
+            token[i] = strtok(NULL, delim); 
         }
 
         strcpy(request,token[0]);
@@ -42,12 +44,18 @@ void handler(int connfd){
         Rio_writen(connfd, buf, n);
 
         if(strcmp (request, "/login")==0){
-            printf("LOGGIN IN\n");
+            printf("LOGGING IN\n");
+            
             //handle login kald
         }
         if(strcmp (request, "/lookup")==0){
-            printf("LOOKING UP\n");  
-            //handle lookup kald
+            printf("LOOKING UP\n");
+            if(flag==1){
+                lookup(connfd, token[1], n);
+            }
+            else {
+                Rio_writen(connfd, "You are not logged in!", n);   
+            }    
         }
         if(strcmp (request, "/logout")==0){
             printf("LOGGIN OUT\n");  
@@ -65,12 +73,14 @@ void handler(int connfd){
 }
 
 //Thread routine
-void *thread(void *vargp)
-{
+void *thread(void *vargp){
+    
   int connfd = *((int *)vargp);
   Pthread_detach(pthread_self()); 
   Free(vargp);
-  
+  // init db
+  db = init_db();
+
   //echo(connfd);
   handler(connfd);
   
@@ -79,7 +89,37 @@ void *thread(void *vargp)
 }
 
 
+struct user* init_db(){
+    struct user* db =  malloc(10 * sizeof(struct user));
 
+    // three users
+    struct user one;
+    one.nick = "Adam";
+    one.password = "mada1";
+    struct user two;
+    two.nick = "Bro";
+    two.password = "orb2";
+    struct user three;
+    three.nick = "Chip";
+    three.password = "pihc3";
+
+    db[0] = one;
+    db[1] = two;
+    db[2] = three;
+
+    return db;
+}
+
+void lookup(int fd, char* nick, size_t n){
+    if(nick){
+        Rio_writen(fd, nick, n);   
+    }
+    else{
+            Rio_writen(fd, db[0].nick, n);   
+            Rio_writen(fd, db[1].nick, n);   
+            Rio_writen(fd, db[2].nick, n);   
+    }
+}
 
 
 
@@ -142,28 +182,8 @@ void echo(int connfd)
     }
 }
 
+
 /*
-struct user* init_db(){
-    struct user* db =  malloc(10 * sizeof(struct user));
-
-    // three users
-    struct user one;
-    one.nick = "Adam";
-    one.password = "mada1";
-    struct user two;
-    two.nick = "Bro";
-    two.password = "orb2";
-    struct user three;
-    three.nick = "Chip";
-    three.password = "pihc3";
-
-    db[0] = one;
-    db[1] = two;
-    db[2] = three;
-
-    return db;
-}
-
 void doit(int fd)
 {
     int is_static;
@@ -179,7 +199,7 @@ void doit(int fd)
     sprintf(buf, "Server users are %s %s %s\r\n", db[0].nick, db[1].nick, db[2].nick);
     Rio_writen(fd, buf, strlen(buf));
 
-    if (strcasecmp(method, "GET")) {                     //line:netp:doit:beginrequesterr
+    if (strcasecmp(Method, "GET")) {                     //line:netp:doit:beginrequesterr
         //clienterror(fd, method, "501", "Not Implemented",      "Tiny does not implement this method");
         return;
     }                                                    //line:netp:doit:endrequesterr
