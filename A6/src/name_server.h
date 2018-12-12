@@ -2,9 +2,8 @@
 
 #define msg_not_in "You are not logged in!\n"
 #define err2 "Login failed; wrong username or password. Please try again\n"
-#define err3 "send login shit tilbage\n"
 #define msg_logout "You are logged out\n"
-
+#define msg_no_compute "Do not compute. Please try again\n"
 
 void lookup(int fd, char* nick);
 struct user* init_db();
@@ -78,7 +77,7 @@ void handler(int connfd){
         else if(strcmp (request, "/lookup")==0){
             printf("LOOKING UP\n");
             if(flag==1){
-                lookup(connfd, nick);
+                lookup(connfd, token[1]);
             }
             else {
                 Rio_writen(connfd, msg_not_in, strlen(msg_not_in));   
@@ -86,16 +85,21 @@ void handler(int connfd){
         }
         else if(strcmp (request, "/logout")==0){
             printf("LOGGING OUT\n");
-            flag = 0;
-            Rio_writen(connfd, msg_logout, strlen(msg_logout));   
+            if(flag==1){
+                flag = 0;
+                Rio_writen(connfd, msg_logout, strlen(msg_logout));
+            }
+            else {
+                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));   
+            }           
         }
         else if(strcmp (request, "/exit")==0){
             printf("EXITTING NOW\n");
-            //handle exit kald
+            // we need to close connection so client does not hænge :-)
             exit(0);
         }
         else{
-            //return en error
+            Rio_writen(connfd, msg_no_compute, strlen(msg_no_compute));   
         }
     }
 }
@@ -138,17 +142,34 @@ struct user* init_db(){
     return db;
 }
 
-void lookup(int fd, char* nick){
-    if(nick){
-        Rio_writen(fd, nick, strlen(nick));   
+void lookup(int fd, char* nick){    
+    if(nick != NULL){
+        Rio_writen(fd, "lookup not null\n", 16);
+        return;
     }
     else{
+        printf("db 0 = %s\n",db[0].nick);
+        Rio_writen(fd, "lookup is null\n", 15);
+        return;
+        
+        /*
+        char* msg =  db[0].nick;
+        size_t n = strlen(msg);     
+        Rio_writen(fd, msg, n);
+        return;
+        
+        
         char out[50];
+        strcpy(out, "str0 ");
+        strcat(out, "str1 ");
+        strcat(out, "str2 ");
+      
+        
         for(int i = 0;i<3;i++){
             strcat(out,db[i].nick);
             strcat(out, "\n");
-        }
-        Rio_writen(fd, out, strlen(out));  
+        } */
+   
     }       
 }
 
