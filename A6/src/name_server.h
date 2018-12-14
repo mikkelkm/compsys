@@ -1,7 +1,7 @@
 #include "csapp.h" //You can remove this if you do not wish to use the helper functions
 
 #define msg_not_in "You are not logged in!\n"
-#define err2 "Login failed; wrong username or password. Please try again\n"
+#define err2 "Login failed; Please try again\n"
 #define msg_logout "You are logged out\n"
 #define msg_no_compute "Do not compute. Please try again\n"
 
@@ -11,9 +11,9 @@ struct user* db = NULL;
 
 
 struct user {
-
     char *nick;
     char *password;
+    int loggedIn;
 };
 
 // handles HTTP requests
@@ -56,8 +56,9 @@ void handler(int connfd){
             printf("Login attempted with: %s\n", nick);
 
             for(int i=0; i < 3; i++){
-              if ((strcmp(db[i].nick, nick)) == 0 && (strcmp(db[i].password, pass) == 0)){
+              if ((strcmp(db[i].nick, nick)) == 0 && (strcmp(db[i].password, pass) == 0) && (db[i].loggedIn == 0)){
                  printf("%s has logged in\n", db[i].nick);
+                 db[i].loggedIn = 1;
                  flag = 1;
                  Rio_writen(connfd, "Welcome\n", 8);
 
@@ -67,12 +68,12 @@ void handler(int connfd){
                 flag = 0;
               }
             }
-            
+
             if(flag != 1){
                 Rio_writen(connfd, err2, strlen(err2));
                 printf("Failed a login attempt\n");
             }
-            
+
         }
         else if(strcmp (request, "/lookup")==0){
             printf("LOOKING UP\n");
@@ -80,8 +81,8 @@ void handler(int connfd){
                 lookup(connfd, token[1]);
             }
             else {
-                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));   
-            } 
+                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));
+            }
         }
         else if(strcmp (request, "/logout")==0){
             printf("LOGGING OUT\n");
@@ -90,8 +91,8 @@ void handler(int connfd){
                 Rio_writen(connfd, msg_logout, strlen(msg_logout));
             }
             else {
-                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));   
-            }           
+                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));
+            }
         }
         else if(strcmp (request, "/exit")==0){
             printf("EXITTING NOW\n");
@@ -99,7 +100,7 @@ void handler(int connfd){
             exit(0);
         }
         else{
-            Rio_writen(connfd, msg_no_compute, strlen(msg_no_compute));   
+            Rio_writen(connfd, msg_no_compute, strlen(msg_no_compute));
         }
     }
 }
@@ -128,12 +129,17 @@ struct user* init_db(){
     struct user one;
     one.nick = "Adam";
     one.password = "mada1";
+    one.loggedIn = 0;
+
     struct user two;
     two.nick = "Bro";
     two.password = "orb2";
+    two.loggedIn = 0;
+
     struct user three;
     three.nick = "Chip";
     three.password = "pihc3";
+    three.loggedIn = 0;
 
     db[0] = one;
     db[1] = two;
@@ -142,7 +148,7 @@ struct user* init_db(){
     return db;
 }
 
-void lookup(int fd, char* nick){    
+void lookup(int fd, char* nick){
     if(nick != NULL){
         Rio_writen(fd, "lookup not null\n", 16);
         return;
@@ -151,26 +157,26 @@ void lookup(int fd, char* nick){
         printf("db 0 = %s\n",db[0].nick);
         Rio_writen(fd, "lookup is null\n", 15);
         return;
-        
+
         /*
         char* msg =  db[0].nick;
-        size_t n = strlen(msg);     
+        size_t n = strlen(msg);
         Rio_writen(fd, msg, n);
         return;
-        
-        
+
+
         char out[50];
         strcpy(out, "str0 ");
         strcat(out, "str1 ");
         strcat(out, "str2 ");
-      
-        
+
+
         for(int i = 0;i<3;i++){
             strcat(out,db[i].nick);
             strcat(out, "\n");
         } */
-   
-    }       
+
+    }
 }
 
 
