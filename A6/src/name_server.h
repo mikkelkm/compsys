@@ -6,6 +6,7 @@
 #define msg_logout "You are logged out\n"
 #define msg_no_compute "Do not compute. Please try again\n"
 #define msg_ip "Not a valid ip address\n"
+#define msg_port "Not a valid port\n"
 
 #define check_nick strcmp(db[i].nick, nick)
 #define check_pass strcmp(db[i].password, pass)
@@ -73,6 +74,9 @@ void handler(int connfd){
       ip_check = isValidIpAddress(ip);
       if (check_localhost != 0 && ip_check == 0) {
         Rio_writen(connfd, msg_ip, strlen(msg_ip));
+      }
+      if (atoi(port) <= 0 || atoi(port) > 65536){
+        Rio_writen(connfd, msg_port, strlen(msg_port));
       }
       else{
         for(int i=0; i < 3; i++){
