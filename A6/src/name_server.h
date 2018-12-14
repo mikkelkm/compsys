@@ -7,6 +7,8 @@
 #define msg_no_compute "Do not compute. Please try again\n"
 #define msg_ip "Not a valid ip address\n"
 #define msg_port "Not a valid port\n"
+#define msg_user_in "User is logged in\n"
+#define msg_user_not_in "User is not logged in\n"
 
 #define check_nick strcmp(db[i].nick, nick)
 #define check_pass strcmp(db[i].password, pass)
@@ -174,34 +176,32 @@ struct user* init_db(){
 }
 
 void lookup(int fd, char* nick){
-  if(nick != NULL){
-    Rio_writen(fd, "lookup not null\n", 16);
-    return;
-  }
-  else{
-    printf("db 0 = %s\n",db[0].nick);
-    Rio_writen(fd, "lookup is null\n", 15);
-    return;
-
-    /*
-    char* msg =  db[0].nick;
-    size_t n = strlen(msg);
-    Rio_writen(fd, msg, n);
-    return;
-
-
-    char out[50];
-    strcpy(out, "str0 ");
-    strcat(out, "str1 ");
-    strcat(out, "str2 ");
+    if(nick != NULL){
+      for(int i=0; i < 3; i++){
+          if(strcmp(nick, db[i].nick) && db[i].loggedIn == 1){
+              Rio_writen(fd, msg_user_in, strlen(msg_user_in));
+          }                      
+      }
+      Rio_writen(fd, msg_user_not_in, strlen(msg_user_not_in));
+    }
+    else{
+        char *users = users_logged_in();
+        Rio_writen(fd, users, strlen(users));
+    }
+}
 
 
-    for(int i = 0;i<3;i++){
-    strcat(out,db[i].nick);
-    strcat(out, "\n");
-   */
-
-  }
+char * users_logged_in(){
+    char str_out[100];
+    strcpy(str_out,"[ ");
+     for(int i=0; i < 3; i++){
+          if(db[i].loggedIn == 1){
+              strcat(str_out, db[i].nick);
+              strcat(str_out, " ");
+          }
+     }
+     strcat(str_out, "]\n");
+     return str_out;     
 }
 
 
