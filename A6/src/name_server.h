@@ -144,7 +144,7 @@ void handler(int connfd){
   //EXIT
   else if(strcmp (request, "/exit")==0){
     printf("EXITTING NOW\n");
-    //close(connfd) måske?
+    close(connfd);
     exit(0);
   }
   else{
