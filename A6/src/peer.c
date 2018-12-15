@@ -1,54 +1,26 @@
-#include <stdio.h>
-#include <assert.h>
-#include "peer.h"
-#include "peer_login.c"
-#include "peer_lookup.c"
-#include "peer_logout.c"
-#include "peer_exit.c"
-#include "peer_input.c"
+#include "csapp.h"
 
-int main() {
+int main(int argc, char **argv)
+{
+  int clientfd;
+  char *host, *port, buf[MAXLINE];
+  rio_t rio;
 
-    int logged_in = 0; // 1 is yes. 0 is no.
-    size_t bufsize = 64;
-    char *input_buf = (char*)calloc(bufsize, sizeof(char*));    
-    const char delim[3] = "\n ";
-    char *token[5];   
-    
-    printf("PEER CLIENT INITIATED \n");
-    
-    while(1){
+  if (argc != 3) {
+    fprintf(stderr, "usage: %s <host> <port>\n", argv[0]);
+    exit(0);
+  }
+  host = argv[1];
+  port = argv[2];
 
-        // get standard in
-        getline(&input_buf, &bufsize, stdin);
-        // tokenize
-        token[0] = strtok(input_buf, delim);
-        for(int i = 1;i<5;i++){
-            token[i] = strtok(NULL, delim);
-        }
-            
-        if(strcmp(token[0], "/login") == 0){
-            logged_in = login(token[1],token[2],token[3],token[4]);
-        } else if(strcmp(token[0], "/lookup") == 0){
-            if(logged_in){
-                lookup(token[1]);
-            } else {
-                printf("You are not logged in!\n");
-            }            
-        } else if(strcmp(token[0], "/logout") == 0){
-            if(logged_in){
-                logout();
-            } else {
-                printf("You are not logged in!\n");
-                
-            }
-        } else if(strcmp(token[0], "/exit") == 0){
-            exit(0);
-            
-        } else{  
-            printf("Do not compute! Valid commands: \n/login <user> <password> <IP> <path> \n/lookup <user> \n/logout \n/exit \n");
-        }       
-    } 
-    return 0;
+  clientfd = Open_clientfd(host, port);
+  Rio_readinitb(&rio, clientfd);
+
+  while (Fgets(buf, MAXLINE, stdin) != NULL) {
+    Rio_writen(clientfd, buf, strlen(buf));
+    Rio_readlineb(&rio, buf, MAXLINE);
+    Fputs(buf, stdout);
+  }
+  Close(clientfd);
+  exit(0);
 }
-
