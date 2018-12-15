@@ -7,7 +7,7 @@
 #define msg_no_compute "Do not compute. Please try again\n"
 #define msg_ip "Not a valid ip address\n"
 #define msg_port "Not a valid port\n"
-#define msg_user_in "Then mentioned user is logged in\n"
+#define msg_user_in "Target is logged in\n"
 #define msg_user_not_in "User is not logged in\n"
 
 #define check_nick strcmp(db[i].nick, nick)
@@ -177,7 +177,7 @@ void lookup(int fd, char* target){
     // lookup specific user
     if(target != NULL){
       for(int i=0; i < 3; i++){
-          if(strcmp(target, db[i].nick) && db[i].loggedIn == 1){
+          if((strcmp(target, db[i].nick)==0) && (db[i].loggedIn == 1)){
               Rio_writen(fd, msg_user_in, strlen(msg_user_in));
               return;
           }                      
@@ -191,112 +191,15 @@ void lookup(int fd, char* target){
     }
 }
 
-
 char * users_logged_in(){
-    char str_out[100];
+    static char str_out[256];
     strcpy(str_out,"[ ");
-     for(int i=0; i < 3; i++){
-          if(db[i].loggedIn == 1){
-              strcat(str_out, db[i].nick);
-              strcat(str_out, " ");
-          }
-     }
-     strcat(str_out, "]\n");
-     return str_out;     
+    for(int i=0; i<3; i++){
+        if(db[i].loggedIn == 1){
+            strcat(str_out, db[i].nick);
+            strcat(str_out, " ");
+        }
+    }
+    strcat(str_out, "]\n");
+    return str_out;     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-int interpreter(char *buf){
-char request[64];
-char nick[32];
-char pass[32];
-char ip[32];
-char port[32];
-
-int temp = 0;
-int t = 0;
-
-sscanf(buf, "%s", request);
-
-if(strcmp (request, "/login\n")==0){
-printf("SERVER receives /login request");
-//handle login kald
-return 1;
-}
-if(strcmp (request, "/lookup\n")==0){
-//handle lookup kald
-return 2;
-}
-if(strcmp (request, "/logout\n")==0){
-//handle logout kald
-return 3;
-}
-if(strcmp (request, "/exit\n")==0){
-//handle exit kald
-exit(0);
-}
-else{
-//return en error
-return 0;
-}
-
-return 0;
-}
-
-
-//echo routine
-void echo(int connfd)
-{
-  size_t n;
-  char buf[MAXLINE];
-  rio_t rio;
-
-  Rio_readinitb(&rio, connfd);
-  while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
-    printf("server received %d bytes\n", (int)n);
-
-    Rio_writen(connfd, buf, n);
-  }
-}
-
-
-
-void doit(int fd)
-{
-int is_static;
-struct stat sbuf;
-char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
-char filename[MAXLINE], cgiargs[MAXLINE];
-rio_t rio;
-
-//Read request line and headers
-Rio_readinitb(&rio, fd);
-Rio_readlineb(&rio, buf, MAXLINE);                   //line:netp:doit:readrequest
-sscanf(buf, "%s %s %s", method, uri, version);       //line:netp:doit:parserequest
-sprintf(buf, "Server users are %s %s %s\r\n", db[0].nick, db[1].nick, db[2].nick);
-Rio_writen(fd, buf, strlen(buf));
-
-if (strcasecmp(Method, "GET")) {                     //line:netp:doit:beginrequesterr
-//clienterror(fd, method, "501", "Not Implemented",      "Tiny does not implement this method");
-return;
-}                                                    //line:netp:doit:endrequesterr
-//read_requesthdrs(&rio);
-}
-*/
