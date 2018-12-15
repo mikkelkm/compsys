@@ -1,14 +1,14 @@
 #include "csapp.h" //You can remove this if you do not wish to use the helper functions
 
 #define msg_not_in "You are not logged in\n"
-#define err1 "You are already logged in\n"
+#define msg_in "You are already logged in\n"
 #define msg_login_fail "Login failed; Please try again\n"
 #define msg_logout "You are logged out\n"
 #define msg_no_compute "Do not compute. Please try again\n"
 #define msg_ip "Not a valid ip address\n"
 #define msg_port "Not a valid port\n"
 #define msg_user_in "Target is logged in\n"
-#define msg_user_not_in "User is not logged in\n"
+#define msg_user_not_in "Target is not logged in\n"
 
 #define check_nick strcmp(db[i].nick, nick)
 #define check_pass strcmp(db[i].password, pass)
@@ -18,7 +18,7 @@ char * users_logged_in();
 void lookup(int fd, char* nick);
 struct user* init_db();
 struct user* db = NULL;
-
+char client_hostname[MAXLINE], client_port[MAXLINE];
 
 struct user {
     char *nick;
@@ -50,8 +50,13 @@ void handler(int connfd){
     int ip_check = 0;
     
     Rio_readinitb(&rio, connfd);
+
     
     while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+
+        printf("Peer's IP address is: %s\n", client_hostname);
+        printf("Peer's port is: %s\n", client_port);
+        
         printf("server received %d bytes\n", (int)n);
         
         strcpy(tok_buf,buf);
@@ -68,7 +73,7 @@ void handler(int connfd){
         //LOGIN
         if(strcmp (request, "/login")==0){
             if (flag == 1){
-                Rio_writen(connfd,"You are already logged in\n", strlen(err1));
+                Rio_writen(connfd, msg_in, strlen(msg_in));
             }
             else{
                 printf("LOGGIN IN\n");
@@ -138,10 +143,7 @@ void *thread(void *vargp){
     Free(vargp);
     // init db
     db = init_db();
-    
-    //echo(connfd);
     handler(connfd);
-    
     Close(connfd);
     return NULL;
 }
