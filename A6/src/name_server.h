@@ -21,131 +21,149 @@ struct user* db = NULL;
 char client_hostname[MAXLINE], client_port[MAXLINE];
 
 struct user {
-    char *nick;
-    char *password;
-    int loggedIn;
+  char *nick;
+  char *password;
+  int loggedIn;
+  int id;
 };
 
 int isValidIpAddress(char *ipAddress){
-    struct sockaddr_in sa;
-    int result = inet_pton(AF_INET, ipAddress, &(sa.sin_addr));
-    return (result != 0);
+  struct sockaddr_in sa;
+  int result = inet_pton(AF_INET, ipAddress, &(sa.sin_addr));
+  return (result != 0);
 }
 
 // handles HTTP requests
 void handler(int connfd){
-    
-    size_t n;
-    char buf[MAXLINE];
-    char tok_buf[MAXLINE];
-    rio_t rio;
-    int flag = 0;
-    char request[32];
-    const char delim[3] = "\n ";
-    char *token[5];
-    char nick[32];
-    char pass[32];
-    char ip[32];
-    char port[32];
-    int ip_check = 0;
-    
-    Rio_readinitb(&rio, connfd);
 
-    
-    while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+  size_t n;
+  char buf[MAXLINE];
+  char tok_buf[MAXLINE];
+  rio_t rio;
+  int flag = 0;
+  char request[32];
+  const char delim[3] = "\n ";
+  char *token[5];
+  char nick[32];
+  char pass[32];
+  char ip[32];
+  char port[32];
+  int ip_check = 0;
 
-        printf("Peer's IP address is: %s\n", client_hostname);
-        printf("Peer's port is: %s\n", client_port);
-        
-        printf("server received %d bytes\n", (int)n);
-        
-        strcpy(tok_buf,buf);
-        
-        // tokenize
-        token[0] = strtok(tok_buf, delim);
-        for(int i = 1;i<5;i++){
-            token[i] = strtok(NULL, delim);
+  Rio_readinitb(&rio, connfd);
+
+
+  while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+
+    printf("server received %d bytes\n", (int)n);
+
+    strcpy(tok_buf,buf);
+
+    // tokenize
+    token[0] = strtok(tok_buf, delim);
+    for(int i = 1;i<5;i++){
+      token[i] = strtok(NULL, delim);
+    }
+    printf("TOKENS 0-4 ARE: %s %s %s %s %s\n", token[0], token[1], token[2], token[3], token[4]);
+    strcpy(request,token[0]);
+    printf("REQUEST received is %s\n", request);
+
+    //LOGIN
+    if(strcmp (request, "/login")==0){
+      if (flag == 1){
+        Rio_writen(connfd, msg_in, strlen(msg_in));
+      }
+      else{
+        printf("LOGGIN IN\n");
+        sscanf(buf, "/login %s %s %s %s\n", nick,pass,ip,port);
+        printf("Login attempted with: %s\n", nick);
+        ip_check = isValidIpAddress(ip);
+        if (check_localhost != 0 && ip_check == 0) {
+          Rio_writen(connfd, msg_ip, strlen(msg_ip));
         }
-        printf("TOKENS 0-4 ARE: %s %s %s %s %s\n", token[0], token[1], token[2], token[3], token[4]);
-        strcpy(request,token[0]);
-        printf("REQUEST received is %s\n", request);
-        
-        //LOGIN
-        if(strcmp (request, "/login")==0){
-            if (flag == 1){
-                Rio_writen(connfd, msg_in, strlen(msg_in));
-            }
-            else{
-                printf("LOGGIN IN\n");
-                sscanf(buf, "/login %s %s %s %s\n", nick,pass,ip,port);
-                printf("Login attempted with: %s\n", nick);
-                ip_check = isValidIpAddress(ip);
-                if (check_localhost != 0 && ip_check == 0) {
-                    Rio_writen(connfd, msg_ip, strlen(msg_ip));
-                }
-                else if (atoi(port) <= 0 || atoi(port) > 65536){
-                    Rio_writen(connfd, msg_port, strlen(msg_port));
-                }
-                else{
-                    for(int i=0; i < 3; i++){
-                        if ((check_nick == 0) && (check_pass == 0) && (db[i].loggedIn == 0)){
-                            printf("%s has logged in\n", db[i].nick);
-                            db[i].loggedIn = 1;
-                            flag = 1;
-                            Rio_writen(connfd, "Welcome\n", 8);
-                        }   
-                    }
-                    if(flag==0){
-                        Rio_writen(connfd, msg_login_fail, strlen(msg_login_fail));
-                        printf("Failed a login attempt\n");
-                    }
-                }   
-            }
-        }
-        //LOOKUP
-        else if(strcmp (request, "/lookup")==0){
-            printf("LOOKING UP\n");
-            if(flag==1){
-                lookup(connfd, token[1]);
-            }
-            else {
-                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));
-            }
-        }
-        //LOGOUT
-        else if(strcmp (request, "/logout")==0){
-            printf("LOGGING OUT\n");
-            if(flag==1){
-                flag = 0;
-                Rio_writen(connfd, msg_logout, strlen(msg_logout));
-            }
-            else {
-                Rio_writen(connfd, msg_not_in, strlen(msg_not_in));
-            }
-        }
-        //EXIT
-        else if(strcmp (request, "/exit")==0){
-            printf("EXITTING NOW\n");
-            // we need to close connection so client does not hænge :-)
-            exit(0);
+        else if (atoi(port) <= 0 || atoi(port) > 65536){
+          Rio_writen(connfd, msg_port, strlen(msg_port));
         }
         else{
-            Rio_writen(connfd, msg_no_compute, strlen(msg_no_compute));
+          for(int i=0; i <= 3; i++){
+            if (i > 2){
+              Rio_writen(connfd, msg_login_fail, strlen(msg_login_fail));
+              printf("%s is already logged in\n", nick);
+            }
+            else if (((check_nick == 0) && (check_pass == 0)) && (db[i].loggedIn == 0) && (db[i].id == 0 || db[i].id != *client_port)){
+              db[i].loggedIn = 1;
+              db[i].id = *client_port;
+              Rio_writen(connfd, "Welcome\n", 8);
+              printf("%s has logged in\n", db[i].nick);
+              printf("%s's IP address is: %s\n", db[i].nick, client_hostname);
+              printf("%s's port is: %s\n", db[i].nick, client_port);
+              printf("%s has a loggedin status of %d\n", db[i].nick, db[i].loggedIn);
+              break;
+            }
+            else{
+                printf("Running loop again\n");
+            }
+          }
         }
+      }
     }
+  //LOOKUP
+  else if(strcmp (request, "/lookup")==0){
+    printf("LOOKING UP\n");
+    for(int i=0; i <= 3; i++){
+      if (i > 2){
+        Rio_writen(connfd, msg_not_in, strlen(msg_not_in));
+      }
+      else if (db[i].id == *client_port){
+        lookup(connfd, token[1]);
+        break;
+      }
+      else {
+        printf("Running loop again\n");
+      }
+    }
+  }
+  //LOGOUT
+  else if(strcmp (request, "/logout")==0){
+    printf("LOGGING OUT\n");
+    for(int i=0; i <= 3; i++){
+      if(i > 2){
+        Rio_writen(connfd, msg_not_in, strlen(msg_not_in));
+      }
+      if (db[i].id == *client_port){
+        db[i].loggedIn = 0;
+        db[i].id = 0;
+        Rio_writen(connfd, msg_logout, strlen(msg_logout));
+        break;
+      }
+      else {
+        printf("Running loop again\n");
+      }
+    }
+  }
+  //EXIT
+  else if(strcmp (request, "/exit")==0){
+    printf("EXITTING NOW\n");
+    //close(connfd) måske?
+    exit(0);
+  }
+  else{
+    Rio_writen(connfd, msg_no_compute, strlen(msg_no_compute));
+  }
+}
 }
 
 //Thread routine
 void *thread(void *vargp){
-    
-    int connfd = *((int *)vargp);
-    Pthread_detach(pthread_self());
-    Free(vargp);
-    // init db
-    db = init_db();
-    handler(connfd);
-    Close(connfd);
-    return NULL;
+
+  int connfd = *((int *)vargp);
+  Pthread_detach(pthread_self());
+  Free(vargp);
+  // init db
+  db = init_db();
+  handler(connfd);
+  Close(connfd);
+  return NULL;
 }
 
 
@@ -176,32 +194,32 @@ struct user* init_db(){
 }
 
 void lookup(int fd, char* target){
-    // lookup specific user
-    if(target != NULL){
-      for(int i=0; i < 3; i++){
-          if((strcmp(target, db[i].nick)==0) && (db[i].loggedIn == 1)){
-              Rio_writen(fd, msg_user_in, strlen(msg_user_in));
-              return;
-          }                      
+  // lookup specific user
+  if(target != NULL){
+    for(int i=0; i < 3; i++){
+      if((strcmp(target, db[i].nick)==0) && (db[i].loggedIn == 1)){
+        Rio_writen(fd, msg_user_in, strlen(msg_user_in));
+        return;
       }
-      Rio_writen(fd, msg_user_not_in, strlen(msg_user_not_in));
     }
-    // lookup all
-    else{
-        char *users = users_logged_in();
-        Rio_writen(fd, users, strlen(users));
-    }
+    Rio_writen(fd, msg_user_not_in, strlen(msg_user_not_in));
+  }
+  // lookup all
+  else{
+    char *users = users_logged_in();
+    Rio_writen(fd, users, strlen(users));
+  }
 }
 
 char * users_logged_in(){
-    static char str_out[256];
-    strcpy(str_out,"[ ");
-    for(int i=0; i<3; i++){
-        if(db[i].loggedIn == 1){
-            strcat(str_out, db[i].nick);
-            strcat(str_out, " ");
-        }
+  static char str_out[256];
+  strcpy(str_out,"[ ");
+  for(int i=0; i<3; i++){
+    if(db[i].loggedIn == 1){
+      strcat(str_out, db[i].nick);
+      strcat(str_out, " ");
     }
-    strcat(str_out, "]\n");
-    return str_out;     
+  }
+  strcat(str_out, "]\n");
+  return str_out;
 }
