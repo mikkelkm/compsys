@@ -1,218 +1,138 @@
-#include "csapp.h"
 #include "name_server.h"
 
-pthread_t tid[20];	//to create different threads
-int tind=0;			//to keep track of threads
+#define PORT 8080
+#define BUFSIZE 2048
+pthread_mutex_t lock;
+users current_users[3];
 
-//structure to hold details of online clients
-struct user
+void userlist(void){
+		strcpy(current_users[0].nick, "John");
+		current_users[0].id = 1;
+		strcpy(current_users[1].nick, "Barrack");
+		current_users[1].id = 2;
+		strcpy(current_users[2].nick, "Bidenbro");
+		current_users[2].id = 3;
+}
+
+void send_to_user(int j, int i, int sockfd, int nbytes_recvd, char *recv_buf, fd_set *master)
 {
-	int port, socket;
-	char ip[100];
-}list [10];
-
-//index pointer for the list of clients
-int ind;
-
-void *thread(void * n_s)
-{
-	char rec_buffer[100], send_buffer[100];
-	struct user o = *(struct user *) n_s;
-	int new_socket = o.socket;
-	int i, j;
-
-	while(1)
-	{
-		printf("\nSERVER : Waiting for : %s %d\n", o.ip, o.port);
-		memset( rec_buffer, 0, sizeof(rec_buffer) );
-		recv( new_socket, &rec_buffer, sizeof(rec_buffer), 0 );
-
-		printf("\nSERVER : Proccessing request from : %s %d\n", o.ip, o.port);
-		printf("%s\n", rec_buffer);
-
-		//Client asked for a list of online users
-		if( strcmp( rec_buffer, "request" ) == 0 )
-		{
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-			printf("SERVER : Size of the list : %d\n", ind);
-
-			//Send the size of list
-			send( new_socket, &ind, sizeof(ind), 0 );
-
-			printf("The List : \n");
-
-			for(i=0; i<ind; i++)
-			{
-				printf("%s %d\n", list[i].ip, list[i].port);
-				if( strcmp( o.ip, list[i].ip) == 0 && o.port == list[i].port )
-					continue;
-
-				//Send the other client's ip and port number
-				send( new_socket, &list[i].ip, sizeof(list[i].ip), 0 );
-				send( new_socket, &list[i].port, sizeof(list[i].port), 0 );
+	if (FD_ISSET(j, master)){
+		if (j != sockfd && j != i) {
+			if (send(j, recv_buf, nbytes_recvd, 0) == -1) {
+				perror("send");
 			}
-		}
-		//Client asked to connect to another client (target_client)
-		else if( strcmp(rec_buffer,"connect") == 0 )
-		{
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-			char rec_ip[100]; int rec_port;
-
-			//Get the ip and port of the target client
-			recv( new_socket, &rec_ip, sizeof(rec_ip), 0 );
-			recv( new_socket, &rec_port, sizeof(rec_port), 0 );
-
-			char this_ip[100];
-			int this_socket, this_port;
-
-			//Find the target_client in the list of online clients
-			//Remove the taget client from the list of online clients
-			for(i=0; i<ind;i++)
-			{
-				if(strcmp( rec_ip, list[i].ip) == 0 && rec_port == list[i].port)
-				{
-					this_socket = list[i].socket;
-					strcpy(this_ip,list[i].ip);
-					this_port = list[i].port;
-					for(j=i; j<ind; j++)
-					{
-						strcpy(list[j].ip,list[j+1].ip);
-						list[j].port = list[j+1].port;
-						list[j].socket = list[j+1].socket;
-					}
-					break;
-				}
-			}
-			ind--;
-
-			//Send target_client details of this client
-			send( this_socket, &new_socket, sizeof(new_socket), 0 );
-
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-			printf("SERVER : Starting chat at the connect side\n");
-
-			//Chatting
-			while(1)
-			{
-				recv( new_socket, &rec_buffer, sizeof(rec_buffer), 0 );
-
-				if(strcmp(rec_buffer,"die")==0)
-					break;
-
-				send( this_socket, &rec_buffer, sizeof(rec_buffer), 0 );
-				if(strcmp(rec_buffer,"end")==0)
-					break;
-			}
-
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-
-			printf("SERVER : chat was closed at the connect side\n");
-
-		}
-		//Client wants to wait for an incoming connection
-		//This Client goes online
-		else if( strcmp(rec_buffer,"wait") == 0 )
-		{
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-
-			//Add this client to online list
-			strcpy(list[ind].ip, o.ip);
-			list[ind].port = o.port;
-			list[ind].socket = o.socket;
-			ind++;
-
-			char this_ip;
-			int this_port, this_socket;
-			printf("SERVER : Waiting for a chat request\n");
-
-			//Client informed it's server instance about the client who is
-			//trying to chat
-			recv( new_socket, &this_socket, sizeof(this_socket), 0 );
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-			printf("SERVER : Got a chat request\n");
-
-			//Chatting
-			while(1)
-			{
-				recv( new_socket, &rec_buffer, sizeof(rec_buffer), 0 );
-
-				if(strcmp(rec_buffer,"die")==0)
-					break;
-
-				send( this_socket, &rec_buffer, sizeof(rec_buffer), 0 );
-				if(strcmp(rec_buffer,"end")==0)
-					break;
-			}
-
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-
-			printf("SERVER : Chat was closed at the wait side\n");
-
-		}
-		//Client wants to logout from the server
-		else if(strcmp(rec_buffer,"logout") == 0)
-		{
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-			printf("SERVER : Closing connection and removing from the list\n");
-			close(new_socket);
-			return 0;
-		}
-		//In case of some garbage message
-		else
-		{
-			printf("SERVER : Something Wrong here\n");
-			printf("\nSERVER : AT : %s %d\n", o.ip, o.port);
-			printf("SERVER : Closing connection and removing from the list\n");
-			close(new_socket);
-			return 0;
 		}
 	}
 }
 
-main()
+void send_recv(int i, fd_set *master, int sockfd, int fdmax)
 {
-	struct sockaddr_in client,server;
+	int nbytes_recvd, j;
+	char recv_buf[BUFSIZE], buf[BUFSIZE];
 
-	int s;
-	socklen_t n;
+	if ((nbytes_recvd = recv(i, recv_buf, BUFSIZE, 0)) <= 0) {
+		if (nbytes_recvd == 0) {
+			printf("socket %d hung up\n", i);
+		}
+		else{
+			perror("recv");
+		}
+		close(i);
+		FD_CLR(i, master);
+	}
+	else{
+	//	printf("%s\n", recv_buf);
+		for(j = 0; j <= fdmax; j++){
+			send_to_user(j, i, sockfd, nbytes_recvd, recv_buf, master);
+		}
+	}
+}
 
-	char rec_buffer[100], send_buffer[100];
+void connection_accept(fd_set *master, int *fdmax, int sockfd, struct sockaddr_in *client_addr)
+{
+	socklen_t addrlen;
+	int newsockfd;
+	int j;
+	int acc;
+	addrlen = sizeof(struct sockaddr_in);
+	if((newsockfd = accept(sockfd, (struct sockaddr *)client_addr, &addrlen)) == -1) {
+		perror("accept");
+		exit(1);
+	}
+	else{
+		FD_SET(newsockfd, master);
+		if(newsockfd > *fdmax){
+			*fdmax = newsockfd;
+		}
+		//printf("user connected from %s on port %d \n",inet_ntoa(client_addr->sin_addr), ntohs(client_addr->sin_port));
+		current_users[j].address = inet_ntoa(client_addr->sin_addr);
+		current_users[j].port = ntohs(client_addr->sin_port);
+		printf("user %s connected with ip %s and port %d\n", current_users[j].nick, current_users[j].address, current_users[j].port);
+		j = j + 1;
 
-	s = socket( AF_INET, SOCK_STREAM, 0 );
-	server.sin_family = AF_INET;
-	server.sin_port = 15518;
-	server.sin_addr.s_addr = inet_addr("127.0.0.1");
+	}
+}
 
-	if ( bind( s, (struct sockaddr *)&server, sizeof(server) ) == -1 )
-	{
-		printf("Binding failed..\n");
-		return 1;
+void connect_request(int *sockfd, struct sockaddr_in *my_addr)
+{
+	int yes = 1;
+
+	if ((*sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		perror("Socket");
+		exit(1);
 	}
 
-	printf("\nServer was started successfully.. waiting for response from client...\n");
+	my_addr->sin_family = AF_INET;
+	my_addr->sin_port = htons(4950);
+	my_addr->sin_addr.s_addr = INADDR_ANY;
+	memset(my_addr->sin_zero, '\0', sizeof my_addr->sin_zero);
 
-	n = sizeof(client);
-
-	int status = listen( s, 2 );
-
-	struct user obj;
-
-	while(1)
-	{
-		//Wait for a new connection
-		int new_socket = accept(s,(struct sockaddr *)&client,&n);
-		printf("SERVER : Got a new connection from -- %s %d\n\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
-
-		//Create a new thread for handling this new client
-		obj.socket = new_socket;
-		obj.port = ntohs(client.sin_port);
-		strcpy(obj.ip,inet_ntoa(client.sin_addr));
-
-		pthread_create( &(tid[tind]), NULL, thread, (void *)&obj );
-		tind++;
+	if (setsockopt(*sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+		perror("setsockopt");
+		exit(1);
 	}
 
-	close(s);
+	if (bind(*sockfd, (struct sockaddr *)my_addr, sizeof(struct sockaddr)) == -1) {
+		perror("Unable to bind");
+		exit(1);
+	}
+	if (listen(*sockfd, 10) == -1) {
+		perror("listen");
+		exit(1);
+	}
+	printf("\nTCPServer Waiting for client on port 4950\n");
+	fflush(stdout);
+}
+int main()
+{
+	userlist();
+	fd_set master;
+	fd_set read_fds;
+	int fdmax, i;
+	int sockfd = 0;
+	struct sockaddr_in my_addr, client_addr;
 
+	FD_ZERO(&master);
+	FD_ZERO(&read_fds);
+	connect_request(&sockfd, &my_addr);
+	FD_SET(sockfd, &master);
+
+	fdmax = sockfd;
+	while(1){
+		read_fds = master;
+		if(select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){
+			perror("select");
+			exit(4);
+		}
+
+		for (i = 0; i <= fdmax; i++){
+			if (FD_ISSET(i, &read_fds)){
+				if (i == sockfd)
+					connection_accept(&master, &fdmax, sockfd, &client_addr);
+				else
+					send_recv(i, &master, sockfd, fdmax);
+			}
+		}
+	}
 	return 0;
 }
